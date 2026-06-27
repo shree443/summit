@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Summit Stories — Our Trek Journal</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --forest: #1A2E1A;
+  --forest-mid: #2D4A2D;
+  --forest-light: #3D6B3D;
+  --trail: #C4915A;
+  --trail-light: #D4A872;
+  --mist: #F0EDE8;
+  --mist-dark: #E0DDD8;
+  --stone: #6B7B6B;
+  --summit: #E8C547;
+  --white: #FAFAF8;
+  --danger: #C0392B;
+  --success: #27AE60;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --radius: 4px;
+  --radius-lg: 12px;
+  --shadow: 0 2px 16px rgba(26,46,26,0.12);
+  --shadow-hover: 0 8px 32px rgba(26,46,26,0.2);
+  --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--mist); color: var(--forest); min-height: 100vh; line-height: 1.6; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--mist-dark); }
+::-webkit-scrollbar-thumb { background: var(--forest-light); border-radius: 3px; }
+
+/* SYNC INDICATOR */
+#syncBar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; background: var(--summit);
+  z-index: 999; opacity: 0;
+  transition: opacity 0.3s;
+}
+#syncBar.show { opacity: 1; }
+
+#syncStatus {
+  position: fixed; top: 8px; right: 12px;
+  font-size: 11px; font-family: var(--font-mono);
+  color: rgba(255,255,255,0.7);
+  z-index: 998; letter-spacing: 0.06em;
+  background: rgba(26,46,26,0.85);
+  padding: 4px 10px; border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.sync-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--summit);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: 240px; height: 100vh;
+  background: var(--forest);
+  display: flex; flex-direction: column;
+  z-index: 100; overflow-y: auto;
+  transition: var(--transition);
+}
+
+.sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-brand .compass { font-size: 28px; display: block; margin-bottom: 8px; }
+.sidebar-brand h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); line-height: 1.2; }
+.sidebar-brand p { font-size: 11px; color: var(--stone); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+.sidebar-nav { padding: 16px 0; flex: 1; }
+.nav-section-label { padding: 8px 24px 4px; font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--font-mono); }
+
+.nav-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 24px; color: rgba(255,255,255,0.65);
+  text-decoration: none; font-size: 14px; font-weight: 400;
+  transition: var(--transition); border-left: 3px solid transparent; cursor: pointer;
+}
+.nav-link:hover { color: var(--white); background: rgba(255,255,255,0.05); border-left-color: var(--trail); }
+.nav-link.active { color: var(--white); background: rgba(196,145,90,0.12); border-left-color: var(--trail); font-weight: 500; }
+.nav-link .icon { font-size: 18px; width: 22px; flex-shrink: 0; }
+
+.sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.trek-counter { background: rgba(255,255,255,0.06); border-radius: var(--radius); padding: 12px; text-align: center; }
+.trek-counter .number { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--summit); line-height: 1; }
+.trek-counter .label { font-size: 11px; color: var(--stone); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+.main { margin-left: 240px; min-height: 100vh; padding: 40px 48px; max-width: 1200px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header { margin-bottom: 36px; }
+.page-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--trail); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
+.page-title { font-family: var(--font-display); font-size: 38px; font-weight: 900; color: var(--forest); line-height: 1.1; }
+.page-subtitle { font-size: 15px; color: var(--stone); margin-top: 8px; max-width: 520px; }
+
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; transition: var(--transition); }
+.card:hover { box-shadow: var(--shadow-hover); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: var(--transition); font-family: var(--font-body); text-decoration: none; }
+.btn-primary { background: var(--forest); color: var(--white); }
+.btn-primary:hover { background: var(--forest-mid); transform: translateY(-1px); }
+.btn-trail { background: var(--trail); color: var(--white); }
+.btn-trail:hover { background: var(--trail-light); transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1.5px solid var(--forest); color: var(--forest); }
+.btn-outline:hover { background: var(--forest); color: var(--white); }
+.btn-ghost { background: transparent; color: var(--stone); padding: 8px 12px; }
+.btn-ghost:hover { background: var(--mist-dark); color: var(--forest); }
+.btn-danger { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: var(--white); }
+
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-family: var(--font-mono); }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--mist); border: 1.5px solid var(--mist-dark); border-radius: var(--radius); font-size: 14px; color: var(--forest); font-family: var(--font-body); transition: var(--transition); outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--forest); background: var(--white); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.badge-upcoming { background: rgba(232,197,71,0.18); color: #B8950E; }
+.badge-completed { background: rgba(39,174,96,0.15); color: #1E8449; }
+.badge-wishlist { background: rgba(196,145,90,0.18); color: #A0703A; }
+.badge-easy { background: rgba(39,174,96,0.12); color: #1E8449; }
+.badge-moderate { background: rgba(232,197,71,0.18); color: #B8950E; }
+.badge-hard { background: rgba(192,57,43,0.12); color: var(--danger); }
+
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.55); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--white); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(10,20,10,0.25); animation: modalIn 0.2s ease; }
+@keyframes modalIn { from { opacity:0; transform: scale(0.96) translateY(10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--stone); padding: 4px; line-height: 1; transition: var(--transition); }
+.modal-close:hover { color: var(--forest); }
+
+#toast { position: fixed; bottom: 28px; right: 28px; background: var(--forest); color: var(--white); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-hover); transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 300; border-left: 4px solid var(--trail); }
+#toast.show { transform: translateY(0); opacity: 1; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--stone); }
+.empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+.empty-state h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--forest); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; margin-bottom: 20px; }
+
+.progress-bar { height: 6px; background: var(--mist-dark); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--trail); border-radius: 3px; transition: width 0.5s ease; }
+.divider { height: 1px; background: var(--mist-dark); margin: 24px 0; }
+.section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--forest); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+.tags-container { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: var(--mist); border: 1.5px solid var(--mist-dark); border-radius: var(--radius); min-height: 42px; cursor: text; }
+.tag { background: var(--forest); color: var(--white); padding: 3px 10px; border-radius: 99px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.tag-remove { cursor: pointer; opacity: 0.7; }
+.tag-remove:hover { opacity: 1; }
+.tag-input { border: none; background: transparent; font-size: 13px; outline: none; flex: 1; min-width: 80px; color: var(--forest); }
+
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.photo-item { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; cursor: pointer; background: var(--mist-dark); }
+.photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.photo-item:hover img { transform: scale(1.05); }
+.photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(26,46,26,0.8), transparent); opacity: 0; transition: var(--transition); display: flex; align-items: flex-end; padding: 12px; }
+.photo-item:hover .photo-overlay { opacity: 1; }
+.photo-overlay span { color: var(--white); font-size: 12px; font-weight: 500; }
+.photo-delete { position: absolute; top: 8px; right: 8px; background: rgba(192,57,43,0.85); border: none; color: white; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+.photo-item:hover .photo-delete { opacity: 1; }
+
+.itinerary-day { border: 1.5px solid var(--mist-dark); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; background: var(--mist); }
+.itinerary-day-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.day-badge { background: var(--forest); color: var(--white); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: var(--font-mono); }
+.day-title-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--forest); outline: none; font-family: var(--font-body); }
+.remove-day { background: none; border: none; cursor: pointer; color: var(--stone); font-size: 16px; }
+
+.trek-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; transition: var(--transition); cursor: pointer; }
+.trek-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.trek-card-header { height: 120px; background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 14px; }
+.trek-card-header::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40 L20 10 L40 30 L30 20 L20 35 L10 15z' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") repeat; }
+.trek-card-number { font-family: var(--font-display); font-size: 52px; font-weight: 900; color: rgba(255,255,255,0.1); position: absolute; right: 12px; top: 4px; line-height: 1; }
+.trek-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--white); position: relative; z-index: 1; line-height: 1.2; }
+.trek-card-body { padding: 16px; }
+.trek-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.trek-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--stone); font-family: var(--font-mono); }
+.trek-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+.stat-card { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); text-align: center; }
+.stat-card .stat-value { font-family: var(--font-display); font-size: 36px; font-weight: 900; color: var(--forest); line-height: 1; }
+.stat-card .stat-label { font-size: 11px; color: var(--stone); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono); margin-top: 4px; }
+
+.hero-elevation { background: var(--forest); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 32px; position: relative; overflow: hidden; }
+.hero-elevation-text { position: relative; z-index: 1; max-width: 380px; }
+.hero-elevation-text .eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--trail); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
+.hero-elevation-text h2 { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--white); line-height: 1.1; margin-bottom: 10px; }
+.hero-elevation-text p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+#elevationSvg { position: absolute; bottom: 0; right: 0; height: 140px; opacity: 0.25; }
+
+.upcoming-banner { background: linear-gradient(135deg, #C4915A 0%, #A07040 100%); border-radius: var(--radius-lg); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.upcoming-banner-text h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); }
+.upcoming-banner-text p { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+.countdown { display: flex; gap: 12px; text-align: center; }
+.countdown-item .num { display: block; font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); line-height: 1; }
+.countdown-item .unit { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); }
+
+.wish-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px; display: flex; align-items: flex-start; gap: 14px; transition: var(--transition); }
+.wish-card:hover { box-shadow: var(--shadow-hover); }
+.wish-card-rank { font-family: var(--font-display); font-size: 26px; font-weight: 900; color: var(--mist-dark); line-height: 1; flex-shrink: 0; width: 36px; text-align: right; }
+.wish-card-info { flex: 1; }
+.wish-card-info h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--forest); }
+.wish-card-info p { font-size: 13px; color: var(--stone); margin-top: 3px; }
+.wish-card-actions { display: flex; gap: 6px; align-items: center; }
+
+.detail-itinerary { position: relative; padding-left: 24px; }
+.detail-itinerary::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: var(--mist-dark); }
+.detail-day { position: relative; margin-bottom: 20px; }
+.detail-day::before { content: ''; position: absolute; left: -20px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--trail); border: 2px solid var(--white); box-shadow: 0 0 0 2px var(--trail); }
+.detail-day h4 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--forest); margin-bottom: 4px; }
+.detail-day p { font-size: 13px; color: var(--stone); }
+
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.92); z-index: 400; align-items: center; justify-content: center; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: var(--radius); object-fit: contain; }
+.lightbox-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: white; font-size: 32px; cursor: pointer; line-height: 1; }
+
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .sidebar-brand h1, .sidebar-brand p, .nav-link span:not(.icon), .nav-section-label, .sidebar-footer .label, .trek-counter { display: none; }
+  .main { margin-left: 60px; padding: 24px 20px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .page-title { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<div id="syncBar"></div>
+<div id="syncStatus"><span class="sync-dot"></span><span id="syncLabel">Syncing…</span></div>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="compass">🧭</span>
+    <h1>Summit Stories</h1>
+    <p>Our Trek Journal</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Explore</div>
+    <a class="nav-link active" data-page="page-home"><span class="icon">🏠</span><span>Home</span></a>
+    <a class="nav-link" data-page="page-schedule"><span class="icon">🗺️</span><span>Schedule Trek</span></a>
+    <a class="nav-link" data-page="page-wishlist"><span class="icon">⭐</span><span>Wishlist</span></a>
+    <div class="nav-section-label" style="margin-top:12px">Memories</div>
+    <a class="nav-link" data-page="page-memories"><span class="icon">📸</span><span>Photo Gallery</span></a>
+    <a class="nav-link" data-page="page-past"><span class="icon">🏅</span><span>Past Treks</span></a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="trek-counter" id="sidebarCounter">
+      <div class="number">0/0</div>
+      <div class="label">Treks Done</div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="hero-elevation">
+      <div class="hero-elevation-text">
+        <div class="eyebrow">Best Friends Forever on Every Summit</div>
+        <h2>Our Mountain<br/>Adventure Log</h2>
+        <p>Every trek is a chapter. Every summit is a memory. Every trail brings us closer.</p>
+      </div>
+      <svg id="elevationSvg" viewBox="0 0 400 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div id="nextTrekBanner"></div>
+    <div class="grid-4" style="margin-bottom:28px">
+      <div class="stat-card"><div class="stat-value" id="statDone">0</div><div class="stat-label">Completed</div></div>
+      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Scheduled</div></div>
+      <div class="stat-card"><div class="stat-value" id="statWish">0</div><div class="stat-label">On Wishlist</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--trail)" id="goalPct">0%</div><div class="stat-label">Goal Progress</div></div>
+    </div>
+    <div class="card" style="margin-bottom:28px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-family:var(--font-display);font-size:18px;font-weight:700">🎯 Trek Goal — 20 Treks Together</span>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--trail)" id="goalText">0 of 20</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="goalFill" style="width:0%"></div></div>
+    </div>
+    <div class="section-title">📋 Trek Log</div>
+    <div id="recentActivity"></div>
+    <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn-trail" onclick="navigate('page-schedule')">+ Schedule a Trek</button>
+      <button class="btn btn-outline" onclick="navigate('page-wishlist')">⭐ Add to Wishlist</button>
+      <button class="btn btn-ghost" onclick="navigate('page-memories')">📸 Upload Photos</button>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="page" id="page-schedule">
+    <div class="page-header">
+      <div class="page-eyebrow">Plan & Organise</div>
+      <h1 class="page-title">Scheduled Treks</h1>
+      <p class="page-subtitle">Plan every detail — itinerary, distance, difficulty — so nothing is left to chance on the trail.</p>
+    </div>
+    <div style="margin-bottom:24px"><button class="btn btn-trail" onclick="openScheduleModal()">+ Plan a New Trek</button></div>
+    <div class="grid-2" id="trekGrid"></div>
+  </div>
+
+  <!-- WISHLIST -->
+  <div class="page" id="page-wishlist">
+    <div class="page-header">
+      <div class="page-eyebrow">Dream Big</div>
+      <h1 class="page-title">Trek Wishlist</h1>
+      <p class="page-subtitle">Every summit you're dreaming of — all in one place. Rank them, plan them, conquer them.</p>
+    </div>
+    <div style="margin-bottom:24px"><button class="btn btn-trail" onclick="openWishModal()">⭐ Add Dream Trek</button></div>
+    <div id="wishlistContainer"></div>
+  </div>
+
+  <!-- MEMORIES -->
+  <div class="page" id="page-memories">
+    <div class="page-header">
+      <div class="page-eyebrow">Your Story</div>
+      <h1 class="page-title">Photo Memories</h1>
+      <p class="page-subtitle">Every photo is a moment, every moment is forever. Your gallery of adventures.</p>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <select class="form-select" id="memoryFilter" style="width:220px"><option value="all">All Treks</option></select>
+      <button class="btn btn-trail" onclick="openPhotoUpload()">📸 Upload Photos</button>
+    </div>
+    <div class="photo-grid" id="memoriesGrid"></div>
+  </div>
+
+  <!-- PAST -->
+  <div class="page" id="page-past">
+    <div class="page-header">
+      <div class="page-eyebrow">The Journey So Far</div>
+      <h1 class="page-title">Past Treks</h1>
+      <p class="page-subtitle" id="pastCount">All your completed adventures, forever logged.</p>
+    </div>
+    <div id="pastTreksContainer"></div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightboxImg" src="" alt="" />
+</div>
+
+<!-- SCHEDULE MODAL -->
+<div class="modal-backdrop" id="scheduleModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2 class="modal-title">🗺️ Plan a Trek</h2>
+      <button class="modal-close" onclick="closeModal('scheduleModal')">×</button>
+    </div>
+    <div id="scheduleForm">
+      <div class="form-group"><label class="form-label">Trek Name *</label><input class="form-input" id="trekTitle" placeholder="e.g. Rajmachi Fort Trek" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="trekLocation" placeholder="e.g. Sahyadri, Maharashtra" /></div>
+        <div class="form-group"><label class="form-label">Difficulty</label><select class="form-select" id="trekDifficulty"><option>Easy</option><option selected>Moderate</option><option>Hard</option><option>Expert</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="trekDate" type="date" /></div>
+        <div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="trekEndDate" type="date" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Duration</label><input class="form-input" id="trekDuration" placeholder="e.g. 2 Days / 1 Night" /></div>
+        <div class="form-group"><label class="form-label">Distance</label><input class="form-input" id="trekDistance" placeholder="e.g. 14 km" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Max Altitude</label><input class="form-input" id="trekAlt" placeholder="e.g. 4500 ft" /></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="trekDesc" placeholder="Tell the story of this trek..."></textarea></div>
+      <div class="form-group"><label class="form-label">Highlights (one per line)</label><textarea class="form-textarea" id="trekHighlights" rows="3" placeholder="Twin forts&#10;Campfire under stars&#10;Monsoon waterfalls"></textarea></div>
+      <div class="form-group"><label class="form-label">Tags</label><div class="tags-container" id="tagContainer"><input class="tag-input" id="tagInput" placeholder="Type + Enter..." /></div></div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span class="section-title" style="margin-bottom:0;font-size:17px">🗓️ Itinerary</span>
+        <button type="button" class="btn btn-ghost" onclick="addItineraryDay()">+ Add Day</button>
+      </div>
+      <div id="itineraryBuilder"></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button type="button" class="btn btn-trail" onclick="saveTrek()">Schedule Trek ✓</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('scheduleModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WISH MODAL -->
+<div class="modal-backdrop" id="wishModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">⭐ Add Dream Trek</h2>
+      <button class="modal-close" onclick="closeModal('wishModal')">×</button>
+    </div>
+    <div id="wishForm">
+      <div class="form-group"><label class="form-label">Trek Name *</label><input class="form-input" id="wishTitle" placeholder="e.g. Harishchandragad" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="wishLocation" placeholder="e.g. Ahmednagar, Maharashtra" /></div>
+        <div class="form-group"><label class="form-label">Difficulty</label><select class="form-select" id="wishDifficulty"><option>Easy</option><option selected>Moderate</option><option>Hard</option><option>Expert</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Approximate Distance</label><input class="form-input" id="wishDistance" placeholder="e.g. 20 km" /></div>
+      <div class="form-group"><label class="form-label">Why this trek?</label><textarea class="form-textarea" id="wishDesc" placeholder="What makes this trek special..."></textarea></div>
+      <div class="form-group"><label class="form-label">Tags</label><div class="tags-container" id="wishTagContainer"><input class="tag-input" id="wishTagInput" placeholder="Type + Enter..." /></div></div>
+      <div style="display:flex;gap:10px">
+        <button type="button" class="btn btn-trail" onclick="saveWish()">Add to Wishlist ⭐</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('wishModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div class="modal-backdrop" id="photoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">📸 Upload Photos</h2>
+      <button class="modal-close" onclick="closeModal('photoModal')">×</button>
+    </div>
+    <div class="form-group"><label class="form-label">Select Trek</label><select class="form-select" id="photoTrekSelect"></select></div>
+    <div class="form-group"><label class="form-label">Caption (optional)</label><input class="form-input" id="photoCaption" placeholder="e.g. Summit at sunrise!" /></div>
+    <div class="form-group"><label class="form-label">Choose Photos</label><input type="file" id="photoFileInput" accept="image/*" multiple style="padding:10px;background:var(--mist);border:1.5px dashed var(--mist-dark);border-radius:4px;width:100%;cursor:pointer" /></div>
+    <div id="photoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-trail" onclick="savePhotos()">Save Photos 📸</button>
+      <button class="btn btn-ghost" onclick="closeModal('photoModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal" style="max-width:620px"></div>
+</div>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════════════════════
+// FIREBASE CONFIGURATION
+// Replace these values with your own Firebase project credentials.
+// Get them from: Firebase Console → Project Settings → Your apps → SDK setup
+// ═══════════════════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBRn4I3EHjoBblxi99L5ENpOpOAmDUNOjA",
+  authDomain:        "summit-86e58.firebaseapp.com",
+  databaseURL:       "https://summit-86e58-default-rtdb.firebaseio.com",
+  projectId:         "summit-86e58",
+  storageBucket:     "summit-86e58.firebasestorage.app",
+  messagingSenderId: "166163975786",
+  appId:             "1:166163975786:web:2fc7f9b20b41809c0b0413",
+  measurementId:     "G-DHW6VC6E1R"
+};
+
+// ─── FIREBASE INIT ────────────────────────────────────────────────────
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, child }
+                                   from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+
+const firebaseApp = initializeApp(FIREBASE_CONFIG);
+const db          = getDatabase(firebaseApp);
+const ROOT        = "summit_stories"; // all data lives under this path
+
+// ─── DB HELPERS ──────────────────────────────────────────────────────
+// dbGet / dbSet mirror the old window.storage API so every caller
+// further down the file works unchanged.
+
+async function dbGet(key) {
+  try {
+    const snap = await get(ref(db, `${ROOT}/${key}`));
+    return snap.exists() ? snap.val() : [];
+  } catch(e) { console.error('dbGet error', e); return []; }
+}
+
+async function dbSet(key, val) {
+  try {
+    await set(ref(db, `${ROOT}/${key}`), val);
+    flashSync();
+  } catch(e) { console.error('dbSet error', e); }
+}
+
+async function dbGetItem(key) {
+  try {
+    const snap = await get(ref(db, `${ROOT}/meta/${key}`));
+    return snap.exists() ? snap.val() : null;
+  } catch { return null; }
+}
+
+async function dbSetItem(key, val) {
+  try { await set(ref(db, `${ROOT}/meta/${key}`), val); }
+  catch(e) { console.error('dbSetItem error', e); }
+}
+
+// ─── SYNC FLASH ───────────────────────────────────────────────────────
+function flashSync() {
+  const bar = document.getElementById('syncBar');
+  bar.classList.add('show');
+  setTimeout(() => bar.classList.remove('show'), 600);
+}
+
+// ─── LIVE SYNC — Firebase onValue listeners (true real-time) ──────────
+// Instead of polling every 4 s we subscribe to Firebase push updates.
+// The listeners call refreshPage() the instant data changes on the server.
+
+let currentPage = 'page-home';
+
+function startRealtimeListeners() {
+  const statusLabel = document.getElementById('syncLabel');
+  const dot         = document.querySelector('.sync-dot');
+
+  // Connection-state indicator
+  const connRef = ref(db, '.info/connected');
+  onValue(connRef, snap => {
+    const online = snap.val() === true;
+    statusLabel.textContent          = online ? 'Live' : 'Offline';
+    dot.style.background             = online ? 'var(--summit)' : 'var(--danger)';
+  });
+
+  // Treks listener
+  onValue(ref(db, `${ROOT}/treks`), () => {
+    flashSync();
+    refreshPage(currentPage);
+  });
+
+  // Wishlist listener
+  onValue(ref(db, `${ROOT}/wishlist`), () => {
+    flashSync();
+    refreshPage(currentPage);
+  });
+}
+
+// ─── SEED DATA ────────────────────────────────────────────────────────
+async function seedDemoData() {
+  const seeded = await dbGetItem('seeded');
+  if (seeded) return;
+
+  await dbSet('treks', [
+    {
+      id: 'trek_oct2024', title: 'Rajmachi Fort Trek', location: 'Sahyadri Range, Maharashtra',
+      date: '2025-10-18', endDate: '2025-10-19', duration: '2 Days / 1 Night',
+      difficulty: 'Moderate', distance: '14 km', maxAlt: '2710 ft', status: 'upcoming',
+      description: 'Our very first trek together! The iconic Rajmachi with its twin forts Shrivardhan and Manaranjan. Starting from Lonavala via Tungarli.',
+      highlights: ['First trek ever!', 'Twin forts', 'Monsoon greenery', 'Camping under stars'],
+      itinerary: [
+        { title: 'Day 1 – Lonavala to Rajmachi Base', details: 'Morning start from Lonavala station. Trek through dense forest cover. Reach Rajmachi village for lunch. Set up camp by afternoon.' },
+        { title: 'Day 2 – Manaranjan & Descent', details: 'Early morning sunrise at Shrivardhan. Trek to Manaranjan fort. Panoramic views of Sahyadri. Descend back to Lonavala by noon.' }
+      ],
+      photos: [], tags: ['Sahyadri', 'Fort', 'Camping', 'Monsoon', 'First Trek']
+    }
+  ]);
+
+  await dbSet('wishlist', [
+    { id: 'w1', title: 'Harishchandragad', location: 'Ahmednagar, Maharashtra', difficulty: 'Hard', distance: '20 km', description: 'The iconic Kokan Kada cliff overhang. One of the most dramatic treks in Sahyadri.', priority: 1, tags: ['Cliff', 'Historical', 'Challenging'] },
+    { id: 'w2', title: 'Kalsubai Peak', location: 'Nashik, Maharashtra', difficulty: 'Moderate', distance: '8 km', description: 'Highest peak in Maharashtra at 5400 ft. Iron ladders and spectacular 360° views.', priority: 2, tags: ['Highest Peak', 'Maharashtra', 'Sunrise'] },
+    { id: 'w3', title: 'Alang-Madan-Kulang', location: 'Nashik, Maharashtra', difficulty: 'Hard', distance: '25 km', description: 'The legendary AMK traverse. Three remote forts in a single expedition.', priority: 3, tags: ['Remote', 'Overnight', 'Expert'] },
+    { id: 'w4', title: 'Bhimashankar', location: 'Pune, Maharashtra', difficulty: 'Easy', distance: '12 km', description: 'Sacred Jyotirlinga with lush Bhimashankar wildlife sanctuary forest trail.', priority: 4, tags: ['Wildlife', 'Sacred', 'Forest'] },
+    { id: 'w5', title: 'Sandhan Valley', location: 'Nashik, Maharashtra', difficulty: 'Moderate', distance: '10 km', description: 'The Valley of Shadows. A stunning gorge with rappelling and river crossings.', priority: 5, tags: ['Gorge', 'Rappelling', 'Adventure'] }
+  ]);
+
+  await dbSetItem('seeded', true);
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────
+function navigate(pageId) {
+  currentPage = pageId;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const page = document.getElementById(pageId);
+  if (page) { page.classList.add('active'); window.scrollTo(0,0); }
+  document.querySelectorAll('.nav-link').forEach(l => { if (l.dataset.page === pageId) l.classList.add('active'); });
+  refreshPage(pageId);
+}
+
+function refreshPage(id) {
+  if (id === 'page-home') renderHome();
+  if (id === 'page-schedule') renderSchedule();
+  if (id === 'page-wishlist') renderWishlist();
+  if (id === 'page-memories') renderMemories();
+  if (id === 'page-past') renderPast();
+  updateSidebarCounter();
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────
+function uid() { return 'id_' + Math.random().toString(36).substr(2,9); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+}
+function daysUntil(d) {
+  if (!d) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((new Date(d+'T00:00:00') - now) / 86400000);
+}
+function difficultyBadge(d) {
+  const map = { Easy:'badge-easy', Moderate:'badge-moderate', Hard:'badge-hard', Expert:'badge-hard' };
+  return `<span class="badge ${map[d]||'badge-moderate'}">${d||'Moderate'}</span>`;
+}
+async function updateSidebarCounter() {
+  const treks = await dbGet('treks');
+  const done = treks.filter(t=>t.status==='completed').length;
+  const el = document.getElementById('sidebarCounter');
+  if (el) el.innerHTML = `<div class="number">${done}/${treks.length}</div><div class="label">Treks Done</div>`;
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─── TAG INPUT ───────────────────────────────────────────────────────
+function initTagInput(containerId, inputId, tagsArr) {
+  const container = document.getElementById(containerId);
+  const input = document.getElementById(inputId);
+  if (!container || !input) return;
+  function renderTags() {
+    container.querySelectorAll('.tag').forEach(t => t.remove());
+    tagsArr.forEach((tag, i) => {
+      const el = document.createElement('div'); el.className = 'tag';
+      el.innerHTML = `${tag} <span class="tag-remove" data-i="${i}">×</span>`;
+      container.insertBefore(el, input);
+    });
+  }
+  container.addEventListener('click', e => {
+    if (e.target.classList.contains('tag-remove')) { tagsArr.splice(+e.target.dataset.i, 1); renderTags(); }
+    else input.focus();
+  });
+  input.addEventListener('keydown', e => {
+    if ((e.key==='Enter'||e.key===',') && input.value.trim()) {
+      e.preventDefault(); tagsArr.push(input.value.trim().replace(',','')); input.value=''; renderTags();
+    }
+    if (e.key==='Backspace' && !input.value && tagsArr.length) { tagsArr.pop(); renderTags(); }
+  });
+  renderTags();
+}
+
+// ─── ITINERARY ───────────────────────────────────────────────────────
+let itineraryDays = [];
+function addItineraryDay() {
+  itineraryDays.push({ title: `Day ${itineraryDays.length+1}`, details:'' });
+  renderItineraryBuilder();
+}
+function renderItineraryBuilder() {
+  const c = document.getElementById('itineraryBuilder'); if (!c) return;
+  c.innerHTML = '';
+  itineraryDays.forEach((day, i) => {
+    c.innerHTML += `<div class="itinerary-day">
+      <div class="itinerary-day-header">
+        <div class="day-badge">${i+1}</div>
+        <input class="day-title-input" placeholder="Day ${i+1} title" value="${day.title}" oninput="itineraryDays[${i}].title=this.value"/>
+        <button class="remove-day" onclick="removeDay(${i})">✕</button>
+      </div>
+      <textarea class="form-textarea" rows="2" placeholder="What will you do this day?" oninput="itineraryDays[${i}].details=this.value">${day.details}</textarea>
+    </div>`;
+  });
+}
+function removeDay(i) { itineraryDays.splice(i,1); renderItineraryBuilder(); }
+
+// ─── HOME ────────────────────────────────────────────────────────────
+async function renderHome() {
+  const [treks, wishlist] = await Promise.all([dbGet('treks'), dbGet('wishlist')]);
+  const completed = treks.filter(t=>t.status==='completed');
+  const upcoming = treks.filter(t=>t.status==='upcoming').sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  document.getElementById('statDone').textContent = completed.length;
+  document.getElementById('statTotal').textContent = treks.length;
+  document.getElementById('statWish').textContent = wishlist.length;
+
+  const goal = 20, pct = Math.min(100, Math.round(completed.length/goal*100));
+  document.getElementById('goalPct').textContent = pct+'%';
+  document.getElementById('goalFill').style.width = pct+'%';
+  document.getElementById('goalText').textContent = `${completed.length} of ${goal} treks completed`;
+
+  const cb = document.getElementById('nextTrekBanner');
+  if (upcoming.length > 0) {
+    const next = upcoming[0], d = Math.max(0, daysUntil(next.date));
+    cb.innerHTML = `<div class="upcoming-banner">
+      <div class="upcoming-banner-text"><h3>🏔️ Next Trek: ${next.title}</h3><p>${next.location} • ${formatDate(next.date)}</p></div>
+      <div class="countdown">
+        <div class="countdown-item"><span class="num">${Math.floor(d/30)}</span><span class="unit">months</span></div>
+        <div class="countdown-item"><span class="num">${d%30}</span><span class="unit">days</span></div>
+      </div></div>`;
+  } else {
+    cb.innerHTML = `<div class="upcoming-banner" style="cursor:pointer" onclick="navigate('page-schedule')">
+      <div class="upcoming-banner-text"><h3>🗺️ Schedule Your First Trek!</h3><p>No upcoming treks. Time to plan an adventure.</p></div>
+      <button class="btn btn-primary" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4)">Plan Now →</button>
+    </div>`;
+  }
+
+  const actEl = document.getElementById('recentActivity');
+  const recent = [...treks].reverse().slice(0,3);
+  if (recent.length === 0) {
+    actEl.innerHTML = `<div class="empty-state"><span class="emoji">🏕️</span><h3>Your story begins here</h3><p>Schedule your first trek to see it here.</p></div>`;
+  } else {
+    actEl.innerHTML = recent.map(t=>`<div class="wish-card" style="margin-bottom:12px;cursor:pointer" onclick="showTrekDetail('${t.id}')">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <strong style="font-family:var(--font-display);font-size:16px">${t.title}</strong>
+          <span class="badge badge-${t.status}">${t.status}</span>
+        </div>
+        <div class="trek-meta-item">📍 ${t.location} &nbsp; 📅 ${formatDate(t.date)}</div>
+      </div>${difficultyBadge(t.difficulty)}</div>`).join('');
+  }
+}
+
+// ─── SCHEDULE ────────────────────────────────────────────────────────
+let scheduleTags = [];
+
+async function renderSchedule() {
+  const treks = await dbGet('treks');
+  const upcoming = treks.filter(t=>t.status==='upcoming');
+  const container = document.getElementById('trekGrid');
+  if (upcoming.length===0) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="emoji">🗺️</span><h3>No treks scheduled yet</h3><p>Plan your first adventure with the button above!</p></div>`;
+    return;
+  }
+  container.innerHTML = upcoming.map((t,i)=>`
+    <div class="trek-card" onclick="showTrekDetail('${t.id}')">
+      <div class="trek-card-header">
+        <div class="trek-card-number">${String(i+1).padStart(2,'0')}</div>
+        <div class="trek-card-title">${t.title}</div>
+      </div>
+      <div class="trek-card-body">
+        <div class="trek-meta">${difficultyBadge(t.difficulty)}<span class="trek-meta-item">📍 ${t.location}</span><span class="trek-meta-item">📅 ${formatDate(t.date)}</span><span class="trek-meta-item">⏱️ ${t.duration||'—'}</span><span class="trek-meta-item">📏 ${t.distance||'—'}</span></div>
+        <p style="font-size:13px;color:var(--stone);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${t.description||''}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${(t.tags||[]).map(tag=>`<span class="badge badge-wishlist">${tag}</span>`).join('')}</div>
+        <div class="trek-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="showTrekDetail('${t.id}')">View Details</button>
+          <button class="btn btn-outline" style="font-size:12px;padding:7px 14px" onclick="markComplete('${t.id}')">Mark Done ✓</button>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 10px" onclick="deleteTrek('${t.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openScheduleModal() {
+  scheduleTags = []; itineraryDays = [];
+  ['trekTitle','trekLocation','trekDate','trekEndDate','trekDuration','trekDistance','trekAlt','trekDesc','trekHighlights'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('trekDifficulty').value = 'Moderate';
+  renderItineraryBuilder();
+  initTagInput('tagContainer','tagInput',scheduleTags);
+  openModal('scheduleModal');
+}
+
+async function saveTrek() {
+  const get = id => document.getElementById(id)?.value?.trim()||'';
+  const title = get('trekTitle');
+  if (!title) { toast('Please enter a trek name'); return; }
+  const trek = {
+    id: uid(), title, location: get('trekLocation'), date: get('trekDate'), endDate: get('trekEndDate'),
+    duration: get('trekDuration'), difficulty: get('trekDifficulty'), distance: get('trekDistance'),
+    maxAlt: get('trekAlt'), description: get('trekDesc'),
+    highlights: get('trekHighlights').split('\n').map(s=>s.trim()).filter(Boolean),
+    itinerary: itineraryDays.map(d=>({title:d.title, details:d.details})),
+    photos: [], tags: [...scheduleTags], status: 'upcoming'
+  };
+  const treks = await dbGet('treks');
+  treks.push(trek);
+  await dbSet('treks', treks);
+  closeModal('scheduleModal');
+  toast('✅ Trek scheduled! Adventure awaits!');
+  renderSchedule(); updateSidebarCounter();
+}
+
+async function markComplete(id) {
+  const treks = await dbGet('treks');
+  const trek = treks.find(t=>t.id===id);
+  if (!trek) return;
+  trek.status = 'completed'; trek.completedDate = new Date().toISOString().split('T')[0];
+  await dbSet('treks', treks);
+  toast('🎉 Trek completed! Amazing achievement!');
+  renderSchedule(); updateSidebarCounter();
+}
+
+async function deleteTrek(id) {
+  if (!confirm('Remove this trek?')) return;
+  const treks = await dbGet('treks');
+  await dbSet('treks', treks.filter(t=>t.id!==id));
+  toast('Trek removed.'); renderSchedule(); updateSidebarCounter();
+}
+
+// ─── DETAIL ──────────────────────────────────────────────────────────
+async function showTrekDetail(id) {
+  const treks = await dbGet('treks');
+  const trek = treks.find(t=>t.id===id); if (!trek) return;
+  const modal = document.getElementById('detailModal');
+  modal.querySelector('.modal').innerHTML = `
+    <div class="modal-header">
+      <div><div class="page-eyebrow">${trek.status==='completed'?'✅ Completed':'📅 Upcoming'} • ${formatDate(trek.date)}</div><h2 class="modal-title">${trek.title}</h2></div>
+      <button class="modal-close" onclick="closeModal('detailModal')">×</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+      ${difficultyBadge(trek.difficulty)}<span class="badge badge-upcoming">📍 ${trek.location}</span>
+      ${trek.distance?`<span class="badge badge-wishlist">📏 ${trek.distance}</span>`:''}
+      ${trek.maxAlt?`<span class="badge badge-wishlist">⛰️ ${trek.maxAlt}</span>`:''}
+      ${trek.duration?`<span class="badge badge-wishlist">⏱️ ${trek.duration}</span>`:''}
+    </div>
+    ${trek.description?`<p style="font-size:14px;color:var(--stone);margin-bottom:16px;line-height:1.7">${trek.description}</p>`:''}
+    ${trek.highlights?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:10px">✨ Highlights</h4><ul style="padding-left:18px;display:flex;flex-direction:column;gap:5px">${trek.highlights.map(h=>`<li style="font-size:14px;color:var(--stone)">${h}</li>`).join('')}</ul>`:''}
+    ${trek.itinerary?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:16px">🗓️ Itinerary</h4><div class="detail-itinerary">${trek.itinerary.map(d=>`<div class="detail-day"><h4>${d.title}</h4><p>${d.details||'Details to be updated.'}</p></div>`).join('')}</div>`:''}
+    ${trek.tags?.length?`<div class="divider"></div><div style="display:flex;flex-wrap:wrap;gap:6px">${trek.tags.map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>`:''}
+    <div class="divider"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${trek.status==='upcoming'?`<button class="btn btn-trail" onclick="markComplete('${trek.id}');closeModal('detailModal')">Mark as Completed ✓</button>`:''}
+      <button class="btn btn-outline" onclick="closeModal('detailModal');navigate('page-memories')">📸 Add Photos</button>
+      <button class="btn btn-ghost" onclick="deleteTrek('${trek.id}');closeModal('detailModal')">🗑 Remove</button>
+    </div>`;
+  openModal('detailModal');
+}
+
+// ─── WISHLIST ────────────────────────────────────────────────────────
+let wishTags = [];
+
+async function renderWishlist() {
+  const list = (await dbGet('wishlist')).sort((a,b)=>a.priority-b.priority);
+  const container = document.getElementById('wishlistContainer');
+  if (list.length===0) {
+    container.innerHTML = `<div class="empty-state"><span class="emoji">⭐</span><h3>Your bucket list awaits</h3><p>Add treks you dream of doing!</p><button class="btn btn-trail" onclick="openWishModal()">+ Add Dream Trek</button></div>`;
+    return;
+  }
+  container.innerHTML = list.map((w,i)=>`
+    <div class="wish-card" style="margin-bottom:12px">
+      <div class="wish-card-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="wish-card-info">
+        <h3>${w.title}</h3>
+        <p>📍 ${w.location||'—'} &nbsp; ${w.distance?`📏 ${w.distance}`:''}</p>
+        ${w.description?`<p style="margin-top:6px;font-size:12px;color:var(--stone)">${w.description}</p>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">${difficultyBadge(w.difficulty)}${(w.tags||[]).map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>
+      </div>
+      <div class="wish-card-actions">
+        <button class="btn btn-outline" style="font-size:12px;padding:7px 12px" onclick="convertToTrek('${w.id}')">Plan it →</button>
+        <button class="btn btn-ghost" style="padding:7px 10px" onclick="deleteWish('${w.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function openWishModal() {
+  wishTags = [];
+  ['wishTitle','wishLocation','wishDistance','wishDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('wishDifficulty').value='Moderate';
+  initTagInput('wishTagContainer','wishTagInput',wishTags);
+  openModal('wishModal');
+}
+
+async function saveWish() {
+  const get = id => document.getElementById(id)?.value?.trim()||'';
+  const title = get('wishTitle');
+  if (!title) { toast('Please enter a trek name'); return; }
+  const list = await dbGet('wishlist');
+  list.push({ id:uid(), title, location:get('wishLocation'), difficulty:get('wishDifficulty'), distance:get('wishDistance'), description:get('wishDesc'), priority:list.length+1, tags:[...wishTags] });
+  await dbSet('wishlist', list);
+  closeModal('wishModal'); toast('⭐ Added to wishlist!'); renderWishlist();
+}
+
+async function deleteWish(id) {
+  if (!confirm('Remove from wishlist?')) return;
+  const list = await dbGet('wishlist');
+  await dbSet('wishlist', list.filter(w=>w.id!==id));
+  toast('Removed from wishlist.'); renderWishlist();
+}
+
+async function convertToTrek(id) {
+  const list = await dbGet('wishlist');
+  const wish = list.find(w=>w.id===id); if (!wish) return;
+  closeModal('wishModal');
+  navigate('page-schedule');
+  setTimeout(() => {
+    openScheduleModal();
+    document.getElementById('trekTitle').value = wish.title;
+    document.getElementById('trekLocation').value = wish.location||'';
+    document.getElementById('trekDifficulty').value = wish.difficulty||'Moderate';
+    document.getElementById('trekDistance').value = wish.distance||'';
+    document.getElementById('trekDesc').value = wish.description||'';
+    wish.tags?.forEach(t=>scheduleTags.push(t));
+    initTagInput('tagContainer','tagInput',scheduleTags);
+    toast('📋 Loaded from wishlist — set a date to schedule!');
+  }, 200);
+}
+
+// ─── MEMORIES ────────────────────────────────────────────────────────
+async function renderMemories() {
+  const treks = await dbGet('treks');
+  const filterEl = document.getElementById('memoryFilter');
+  filterEl.innerHTML = `<option value="all">All Treks</option>` + treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+  displayMemories(filterEl.value||'all');
+}
+
+async function displayMemories(filterVal) {
+  const treks = await dbGet('treks');
+  const container = document.getElementById('memoriesGrid');
+  let photos = [];
+  treks.forEach(t => {
+    if (filterVal!=='all' && t.id!==filterVal) return;
+    (t.photos||[]).forEach(p=>photos.push({...p, trekTitle:t.title, trekId:t.id}));
+  });
+  if (photos.length===0) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="emoji">📸</span><h3>No memories yet</h3><p>Upload photos from your treks to build your gallery!</p></div>`;
+    return;
+  }
+  container.innerHTML = photos.map(p=>`
+    <div class="photo-item" onclick="openLightbox('${p.data}')">
+      <img src="${p.data}" alt="${p.caption||p.trekTitle}" loading="lazy" />
+      <div class="photo-overlay"><span>${p.caption||p.trekTitle}</span></div>
+      <button class="photo-delete" onclick="event.stopPropagation();deletePhoto('${p.trekId}','${p.id}')">×</button>
+    </div>`).join('');
+}
+
+async function openPhotoUpload() {
+  const treks = await dbGet('treks');
+  if (treks.length===0) { toast('Schedule a trek first!'); return; }
+  document.getElementById('photoTrekSelect').innerHTML = treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+  document.getElementById('photoCaption').value = '';
+  document.getElementById('photoFileInput').value = '';
+  document.getElementById('photoPreview').innerHTML = '';
+  openModal('photoModal');
+}
+
+let pendingPhotoFiles = [];
+function handlePhotoFiles(files) {
+  pendingPhotoFiles = [];
+  const preview = document.getElementById('photoPreview'); preview.innerHTML = '';
+  Array.from(files).slice(0,12).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      pendingPhotoFiles.push(e.target.result);
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:70px;height:70px;object-fit:cover;border-radius:4px;border:2px solid var(--forest)';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function savePhotos() {
+  if (pendingPhotoFiles.length===0) { toast('Please select photos'); return; }
+  const trekId = document.getElementById('photoTrekSelect').value;
+  const caption = document.getElementById('photoCaption').value.trim();
+  const treks = await dbGet('treks');
+  const trek = treks.find(t=>t.id===trekId); if (!trek) return;
+  pendingPhotoFiles.forEach(data => {
+    trek.photos = trek.photos||[];
+    trek.photos.push({ id:uid(), data, caption, date:new Date().toISOString() });
+  });
+  await dbSet('treks', treks);
+  closeModal('photoModal');
+  toast(`📸 ${pendingPhotoFiles.length} photo(s) added!`);
+  pendingPhotoFiles = [];
+  displayMemories(document.getElementById('memoryFilter').value||'all');
+}
+
+async function deletePhoto(trekId, photoId) {
+  if (!confirm('Delete this photo?')) return;
+  const treks = await dbGet('treks');
+  const trek = treks.find(t=>t.id===trekId);
+  if (trek) { trek.photos = trek.photos.filter(p=>p.id!==photoId); await dbSet('treks', treks); }
+  toast('Photo deleted.');
+  displayMemories(document.getElementById('memoryFilter').value||'all');
+}
+
+function openLightbox(src) { document.getElementById('lightboxImg').src=src; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+// ─── PAST TREKS ──────────────────────────────────────────────────────
+async function renderPast() {
+  const treks = (await dbGet('treks')).filter(t=>t.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const container = document.getElementById('pastTreksContainer');
+  document.getElementById('pastCount').textContent = treks.length+' treks completed';
+  if (treks.length===0) {
+    container.innerHTML = `<div class="empty-state"><span class="emoji">🏅</span><h3>No completed treks yet</h3><p>Your first completed trek will appear here.</p></div>`;
+    return;
+  }
+  container.innerHTML = treks.map((t,i)=>`
+    <div class="card" style="margin-bottom:16px;cursor:pointer" onclick="showTrekDetail('${t.id}')">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--trail)">#${String(i+1).padStart(2,'0')}</span>
+            <h3 style="font-family:var(--font-display);font-size:20px;font-weight:700">${t.title}</h3>
+            <span class="badge badge-completed">✓ Completed</span>
+          </div>
+          <div class="trek-meta">
+            <span class="trek-meta-item">📍 ${t.location}</span>
+            <span class="trek-meta-item">📅 ${formatDate(t.date)}</span>
+            ${t.duration?`<span class="trek-meta-item">⏱️ ${t.duration}</span>`:''}
+            ${t.distance?`<span class="trek-meta-item">📏 ${t.distance}</span>`:''}
+          </div>
+          ${t.description?`<p style="font-size:13px;color:var(--stone);margin-top:8px;max-width:500px">${t.description}</p>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">${difficultyBadge(t.difficulty)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── ELEVATION SVG ───────────────────────────────────────────────────
+function drawElevation() {
+  const svg = document.getElementById('elevationSvg'); if (!svg) return;
+  const pts = [0,15,8,45,30,20,55,60,70,40,85,70,100,50].map((v,i)=>i%2===0?v*4:130-v*1.2);
+  let d = `M ${pts[0]},${pts[1]}`;
+  for (let i=2;i<pts.length;i+=2) d+=` L ${pts[i]},${pts[i+1]}`;
+  svg.innerHTML = `<polyline points="${pts.reduce((a,v,i)=>a+(i%2===0?'\n':',')+v,'').trim()}" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-2]}" cy="${pts[pts.length-1]}" r="5" fill="#E8C547"/>`;
+}
+
+// ─── EXPOSE GLOBALS (required because this is a module script) ────────
+// HTML onclick="..." attributes only reach window-level names.
+// We assign every function used inline in the HTML markup to window.
+Object.assign(window, {
+  navigate, openModal, closeModal,
+  openScheduleModal, saveTrek, deleteTrek, completeTrek, showTrekDetail,
+  addItineraryDay, removeDay,
+  openWishModal, saveWish, deleteWish, promoteToTrek,
+  openPhotoUpload, savePhotos, deletePhoto, handlePhotoFiles,
+  openLightbox, closeLightbox,
+  displayMemories,
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  drawElevation();
+
+  await seedDemoData();
+
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => navigate(link.dataset.page));
+  });
+  document.querySelectorAll('.modal-backdrop').forEach(bd => {
+    bd.addEventListener('click', e => { if (e.target===bd) bd.classList.remove('open'); });
+  });
+  document.getElementById('photoFileInput')?.addEventListener('change', e => handlePhotoFiles(e.target.files));
+  document.getElementById('memoryFilter')?.addEventListener('change', e => displayMemories(e.target.value));
+
+  navigate('page-home');
+
+  // Start Firebase real-time listeners (replaces setInterval polling)
+  startRealtimeListeners();
+});
+</script>
+</body>
+</html>

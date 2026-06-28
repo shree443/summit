@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Summit Stories — Our Trek Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
-
 :root {
   --forest: #1A2E1A;
   --forest-mid: #2D4A2D;
@@ -28,6 +28,8 @@
   --shadow: 0 2px 16px rgba(26,46,26,0.12);
   --shadow-hover: 0 8px 32px rgba(26,46,26,0.2);
   --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  --sidebar-w: 240px;
+  --mobile-nav-h: 64px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,70 +40,47 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 ::-webkit-scrollbar-track { background: var(--mist-dark); }
 ::-webkit-scrollbar-thumb { background: var(--forest-light); border-radius: 3px; }
 
-/* SYNC INDICATOR */
-#syncBar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 3px; background: var(--summit);
-  z-index: 999; opacity: 0;
-  transition: opacity 0.3s;
-}
+/* ── SYNC ── */
+#syncBar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--summit); z-index: 999; opacity: 0; transition: opacity 0.3s; }
 #syncBar.show { opacity: 1; }
+#syncStatus { position: fixed; top: 8px; right: 12px; font-size: 11px; font-family: var(--font-mono); color: rgba(255,255,255,0.85); z-index: 998; letter-spacing: 0.06em; background: rgba(26,46,26,0.9); padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--summit); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
 
-#syncStatus {
-  position: fixed; top: 8px; right: 12px;
-  font-size: 11px; font-family: var(--font-mono);
-  color: rgba(255,255,255,0.7);
-  z-index: 998; letter-spacing: 0.06em;
-  background: rgba(26,46,26,0.85);
-  padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 6px;
-}
-
-.sync-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--summit);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-/* SIDEBAR */
-.sidebar {
-  position: fixed; top: 0; left: 0;
-  width: 240px; height: 100vh;
-  background: var(--forest);
-  display: flex; flex-direction: column;
-  z-index: 100; overflow-y: auto;
-  transition: var(--transition);
-}
-
+/* ── SIDEBAR (desktop) ── */
+.sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--forest); display: flex; flex-direction: column; z-index: 100; overflow-y: auto; transition: var(--transition); }
 .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .sidebar-brand .compass { font-size: 28px; display: block; margin-bottom: 8px; }
 .sidebar-brand h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); line-height: 1.2; }
 .sidebar-brand p { font-size: 11px; color: var(--stone); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
-
 .sidebar-nav { padding: 16px 0; flex: 1; }
 .nav-section-label { padding: 8px 24px 4px; font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--font-mono); }
-
-.nav-link {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 24px; color: rgba(255,255,255,0.65);
-  text-decoration: none; font-size: 14px; font-weight: 400;
-  transition: var(--transition); border-left: 3px solid transparent; cursor: pointer;
-}
+.nav-link { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px; font-weight: 400; transition: var(--transition); border-left: 3px solid transparent; cursor: pointer; }
 .nav-link:hover { color: var(--white); background: rgba(255,255,255,0.05); border-left-color: var(--trail); }
 .nav-link.active { color: var(--white); background: rgba(196,145,90,0.12); border-left-color: var(--trail); font-weight: 500; }
 .nav-link .icon { font-size: 18px; width: 22px; flex-shrink: 0; }
-
 .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
 .trek-counter { background: rgba(255,255,255,0.06); border-radius: var(--radius); padding: 12px; text-align: center; }
 .trek-counter .number { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--summit); line-height: 1; }
 .trek-counter .label { font-size: 11px; color: var(--stone); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
 
-.main { margin-left: 240px; min-height: 100vh; padding: 40px 48px; max-width: 1200px; }
+/* ── MOBILE TOP BAR ── */
+.mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: var(--forest); z-index: 110; align-items: center; padding: 0 16px; gap: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.mobile-topbar .compass-sm { font-size: 22px; }
+.mobile-topbar h1 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--white); flex: 1; }
+.mobile-topbar .trek-pill { background: rgba(232,197,71,0.2); border: 1px solid var(--summit); border-radius: 99px; padding: 3px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--summit); }
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--mobile-nav-h); background: var(--forest); z-index: 110; border-top: 1px solid rgba(255,255,255,0.1); }
+.mobile-nav-inner { display: flex; height: 100%; }
+.mobile-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-family: var(--font-body); transition: var(--transition); padding: 8px 4px; position: relative; }
+.mobile-nav-btn.active { color: var(--trail); }
+.mobile-nav-btn .icon { font-size: 20px; line-height: 1; }
+.mobile-nav-btn .label { font-size: 9px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.mobile-nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 2px; background: var(--trail); border-radius: 2px 2px 0 0; }
+
+/* ── MAIN CONTENT ── */
+.main { margin-left: var(--sidebar-w); min-height: 100vh; padding: 40px 48px; }
 .page { display: none; }
 .page.active { display: block; }
 .page-header { margin-bottom: 36px; }
@@ -109,13 +88,14 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 .page-title { font-family: var(--font-display); font-size: 38px; font-weight: 900; color: var(--forest); line-height: 1.1; }
 .page-subtitle { font-size: 15px; color: var(--stone); margin-top: 8px; max-width: 520px; }
 
+/* ── CARD ── */
 .card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; transition: var(--transition); }
 .card:hover { box-shadow: var(--shadow-hover); }
-
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
 
+/* ── BUTTONS ── */
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: var(--transition); font-family: var(--font-body); text-decoration: none; }
 .btn-primary { background: var(--forest); color: var(--white); }
 .btn-primary:hover { background: var(--forest-mid); transform: translateY(-1px); }
@@ -128,6 +108,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 .btn-danger { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); }
 .btn-danger:hover { background: var(--danger); color: var(--white); }
 
+/* ── FORMS ── */
 .form-group { margin-bottom: 18px; }
 .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-family: var(--font-mono); }
 .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--mist); border: 1.5px solid var(--mist-dark); border-radius: var(--radius); font-size: 14px; color: var(--forest); font-family: var(--font-body); transition: var(--transition); outline: none; }
@@ -135,6 +116,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 .form-textarea { resize: vertical; min-height: 80px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
+/* ── BADGES ── */
 .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
 .badge-upcoming { background: rgba(232,197,71,0.18); color: #B8950E; }
 .badge-completed { background: rgba(39,174,96,0.15); color: #1E8449; }
@@ -143,87 +125,98 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 .badge-moderate { background: rgba(232,197,71,0.18); color: #B8950E; }
 .badge-hard { background: rgba(192,57,43,0.12); color: var(--danger); }
 
-.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.55); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+/* ── MODAL ── */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.55); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
 .modal-backdrop.open { display: flex; }
-.modal { background: var(--white); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(10,20,10,0.25); animation: modalIn 0.2s ease; }
-@keyframes modalIn { from { opacity:0; transform: scale(0.96) translateY(10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+.modal { background: var(--white); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(10,20,10,0.25); animation: modalIn 0.2s ease; }
+@keyframes modalIn { from { opacity:0; transform:scale(0.96) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
 .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
-.modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; }
-.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--stone); padding: 4px; line-height: 1; transition: var(--transition); }
+.modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--stone); padding: 4px; line-height: 1; transition: var(--transition); flex-shrink: 0; }
 .modal-close:hover { color: var(--forest); }
 
-#toast { position: fixed; bottom: 28px; right: 28px; background: var(--forest); color: var(--white); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-hover); transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 300; border-left: 4px solid var(--trail); }
+/* ── TOAST ── */
+#toast { position: fixed; bottom: calc(var(--mobile-nav-h) + 16px); right: 16px; background: var(--forest); color: var(--white); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; box-shadow: var(--shadow-hover); transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 300; border-left: 4px solid var(--trail); max-width: 280px; }
 #toast.show { transform: translateY(0); opacity: 1; }
 
+/* ── MISC ── */
 .empty-state { text-align: center; padding: 60px 20px; color: var(--stone); }
 .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
 .empty-state h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--forest); margin-bottom: 8px; }
 .empty-state p { font-size: 14px; margin-bottom: 20px; }
-
 .progress-bar { height: 6px; background: var(--mist-dark); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--trail); border-radius: 3px; transition: width 0.5s ease; }
 .divider { height: 1px; background: var(--mist-dark); margin: 24px 0; }
 .section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--forest); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 
+/* ── TAGS ── */
 .tags-container { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: var(--mist); border: 1.5px solid var(--mist-dark); border-radius: var(--radius); min-height: 42px; cursor: text; }
 .tag { background: var(--forest); color: var(--white); padding: 3px 10px; border-radius: 99px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
 .tag-remove { cursor: pointer; opacity: 0.7; }
 .tag-remove:hover { opacity: 1; }
 .tag-input { border: none; background: transparent; font-size: 13px; outline: none; flex: 1; min-width: 80px; color: var(--forest); }
 
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+/* ── PHOTO GRID ── */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 .photo-item { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; cursor: pointer; background: var(--mist-dark); }
 .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-.photo-item:hover img { transform: scale(1.05); }
-.photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(26,46,26,0.8), transparent); opacity: 0; transition: var(--transition); display: flex; align-items: flex-end; padding: 12px; }
+.photo-item:hover img, .photo-item:active img { transform: scale(1.05); }
+.photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(26,46,26,0.8), transparent); opacity: 0; transition: var(--transition); display: flex; align-items: flex-end; padding: 10px; }
 .photo-item:hover .photo-overlay { opacity: 1; }
-.photo-overlay span { color: var(--white); font-size: 12px; font-weight: 500; }
-.photo-delete { position: absolute; top: 8px; right: 8px; background: rgba(192,57,43,0.85); border: none; color: white; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+.photo-overlay span { color: var(--white); font-size: 11px; font-weight: 500; }
+.photo-delete { position: absolute; top: 6px; right: 6px; background: rgba(192,57,43,0.85); border: none; color: white; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
 .photo-item:hover .photo-delete { opacity: 1; }
 
+/* ── ITINERARY ── */
 .itinerary-day { border: 1.5px solid var(--mist-dark); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; background: var(--mist); }
 .itinerary-day-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .day-badge { background: var(--forest); color: var(--white); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: var(--font-mono); }
-.day-title-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--forest); outline: none; font-family: var(--font-body); }
+.day-title-input { flex: 1; border: none; background: transparent; font-size: 14px; font-weight: 600; color: var(--forest); outline: none; }
 .remove-day { background: none; border: none; cursor: pointer; color: var(--stone); font-size: 16px; }
 
+/* ── TREK CARDS ── */
 .trek-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; transition: var(--transition); cursor: pointer; }
 .trek-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
-.trek-card-header { height: 120px; background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 14px; }
+.trek-card-header { height: 110px; background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 14px; }
 .trek-card-header::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40 L20 10 L40 30 L30 20 L20 35 L10 15z' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") repeat; }
-.trek-card-number { font-family: var(--font-display); font-size: 52px; font-weight: 900; color: rgba(255,255,255,0.1); position: absolute; right: 12px; top: 4px; line-height: 1; }
-.trek-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--white); position: relative; z-index: 1; line-height: 1.2; }
-.trek-card-body { padding: 16px; }
-.trek-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.trek-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--stone); font-family: var(--font-mono); }
-.trek-actions { display: flex; gap: 8px; margin-top: 12px; }
+.trek-card-number { font-family: var(--font-display); font-size: 48px; font-weight: 900; color: rgba(255,255,255,0.1); position: absolute; right: 10px; top: 4px; line-height: 1; }
+.trek-card-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--white); position: relative; z-index: 1; line-height: 1.2; }
+.trek-card-body { padding: 14px; }
+.trek-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.trek-meta-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--stone); font-family: var(--font-mono); }
+.trek-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
-.stat-card { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); text-align: center; }
-.stat-card .stat-value { font-family: var(--font-display); font-size: 36px; font-weight: 900; color: var(--forest); line-height: 1; }
-.stat-card .stat-label { font-size: 11px; color: var(--stone); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono); margin-top: 4px; }
+/* ── STAT CARDS ── */
+.stat-card { background: var(--white); border-radius: var(--radius-lg); padding: 18px 14px; box-shadow: var(--shadow); text-align: center; }
+.stat-card .stat-value { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--forest); line-height: 1; }
+.stat-card .stat-label { font-size: 10px; color: var(--stone); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono); margin-top: 4px; }
 
-.hero-elevation { background: var(--forest); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 32px; position: relative; overflow: hidden; }
+/* ── HERO ── */
+.hero-elevation { background: var(--forest); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 24px; position: relative; overflow: hidden; }
 .hero-elevation-text { position: relative; z-index: 1; max-width: 380px; }
 .hero-elevation-text .eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--trail); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
-.hero-elevation-text h2 { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--white); line-height: 1.1; margin-bottom: 10px; }
-.hero-elevation-text p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6; }
-#elevationSvg { position: absolute; bottom: 0; right: 0; height: 140px; opacity: 0.25; }
+.hero-elevation-text h2 { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); line-height: 1.1; margin-bottom: 8px; }
+.hero-elevation-text p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+#elevationSvg { position: absolute; bottom: 0; right: 0; height: 120px; opacity: 0.25; }
 
-.upcoming-banner { background: linear-gradient(135deg, #C4915A 0%, #A07040 100%); border-radius: var(--radius-lg); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.upcoming-banner-text h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); }
-.upcoming-banner-text p { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
-.countdown { display: flex; gap: 12px; text-align: center; }
-.countdown-item .num { display: block; font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--white); line-height: 1; }
-.countdown-item .unit { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); }
+/* ── UPCOMING BANNER ── */
+.upcoming-banner { background: linear-gradient(135deg, #C4915A 0%, #A07040 100%); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+.upcoming-banner-text h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--white); }
+.upcoming-banner-text p { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+.countdown { display: flex; gap: 10px; text-align: center; }
+.countdown-item .num { display: block; font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--white); line-height: 1; }
+.countdown-item .unit { font-size: 9px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); }
 
-.wish-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px; display: flex; align-items: flex-start; gap: 14px; transition: var(--transition); }
+/* ── WISH CARD ── */
+.wish-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 16px; display: flex; align-items: flex-start; gap: 12px; transition: var(--transition); }
 .wish-card:hover { box-shadow: var(--shadow-hover); }
-.wish-card-rank { font-family: var(--font-display); font-size: 26px; font-weight: 900; color: var(--mist-dark); line-height: 1; flex-shrink: 0; width: 36px; text-align: right; }
-.wish-card-info { flex: 1; }
-.wish-card-info h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--forest); }
-.wish-card-info p { font-size: 13px; color: var(--stone); margin-top: 3px; }
-.wish-card-actions { display: flex; gap: 6px; align-items: center; }
+.wish-card-rank { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--mist-dark); line-height: 1; flex-shrink: 0; width: 32px; text-align: right; }
+.wish-card-info { flex: 1; min-width: 0; }
+.wish-card-info h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--forest); }
+.wish-card-info p { font-size: 12px; color: var(--stone); margin-top: 2px; }
+.wish-card-actions { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
 
+/* ── DETAIL ITINERARY ── */
 .detail-itinerary { position: relative; padding-left: 24px; }
 .detail-itinerary::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: var(--mist-dark); }
 .detail-day { position: relative; margin-bottom: 20px; }
@@ -231,18 +224,73 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 .detail-day h4 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--forest); margin-bottom: 4px; }
 .detail-day p { font-size: 13px; color: var(--stone); }
 
-.lightbox { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.92); z-index: 400; align-items: center; justify-content: center; }
+/* ── LIGHTBOX ── */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(10,20,10,0.95); z-index: 400; align-items: center; justify-content: center; }
 .lightbox.open { display: flex; }
-.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: var(--radius); object-fit: contain; }
-.lightbox-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: white; font-size: 32px; cursor: pointer; line-height: 1; }
+.lightbox img { max-width: 92vw; max-height: 88vh; border-radius: var(--radius); object-fit: contain; }
+.lightbox-close { position: absolute; top: 16px; right: 18px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 
+/* ── WORLD MAP PAGE ── */
+#worldMapWrap { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 0; overflow: hidden; margin-bottom: 24px; }
+#worldMapContainer { width: 100%; height: 480px; background: #e8f4f0; position: relative; overflow: hidden; }
+#worldMapSvg { width: 100%; height: 100%; }
+.map-pin { cursor: pointer; transition: var(--transition); }
+.map-pin circle { transition: var(--transition); }
+.map-pin:hover circle { r: 9; }
+.map-tooltip { position: absolute; background: var(--forest); color: var(--white); padding: 10px 14px; border-radius: var(--radius); font-size: 12px; pointer-events: none; z-index: 10; min-width: 160px; max-width: 220px; box-shadow: var(--shadow-hover); transform: translate(-50%, -100%); margin-top: -12px; opacity: 0; transition: opacity 0.15s; }
+.map-tooltip.visible { opacity: 1; }
+.map-tooltip h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.map-tooltip p { font-size: 11px; color: rgba(255,255,255,0.75); line-height: 1.4; }
+.map-tooltip .tip-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.tip-badge { font-size: 10px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 99px; font-family: var(--font-mono); }
+.map-legend { display: flex; gap: 16px; padding: 12px 20px; border-top: 1px solid var(--mist-dark); flex-wrap: wrap; }
+.map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--font-mono); color: var(--stone); }
+.map-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.map-controls { padding: 12px 20px; border-bottom: 1px solid var(--mist-dark); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.map-filter-btn { padding: 5px 14px; border-radius: 99px; border: 1.5px solid var(--mist-dark); background: var(--mist); font-size: 12px; font-family: var(--font-mono); color: var(--stone); cursor: pointer; transition: var(--transition); }
+.map-filter-btn.active { background: var(--forest); color: var(--white); border-color: var(--forest); }
+.map-search { flex: 1; padding: 5px 12px; border-radius: 99px; border: 1.5px solid var(--mist-dark); background: var(--white); font-size: 12px; font-family: var(--font-body); color: var(--forest); outline: none; min-width: 140px; }
+.map-search:focus { border-color: var(--forest); }
+.trek-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 20px; }
+.trek-list-item { background: var(--white); border-radius: var(--radius-lg); padding: 14px; box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); border-left: 3px solid transparent; }
+.trek-list-item:hover { box-shadow: var(--shadow-hover); border-left-color: var(--trail); }
+.trek-list-item h4 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.trek-list-item .trek-country { font-size: 11px; color: var(--trail); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+
+/* ── PAST TREK ── */
+.past-trek-item { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; cursor: pointer; transition: var(--transition); display: flex; align-items: flex-start; gap: 16px; }
+.past-trek-item:hover { box-shadow: var(--shadow-hover); }
+.past-num { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--mist-dark); flex-shrink: 0; width: 42px; line-height: 1; }
+
+/* ── RESPONSIVE: tablet ── */
 @media (max-width: 900px) {
-  .sidebar { width: 60px; }
-  .sidebar-brand h1, .sidebar-brand p, .nav-link span:not(.icon), .nav-section-label, .sidebar-footer .label, .trek-counter { display: none; }
-  .main { margin-left: 60px; padding: 24px 20px; }
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .mobile-topbar { display: flex; }
+  .mobile-nav { display: block; }
+  .main { margin-left: 0; padding: 16px 14px; padding-top: 72px; padding-bottom: calc(var(--mobile-nav-h) + 16px); }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .page-title { font-size: 28px; }
+  #worldMapContainer { height: 300px; }
+  .trek-list-grid { grid-template-columns: 1fr; }
+}
+/* ── RESPONSIVE: phone ── */
+@media (max-width: 540px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card .stat-value { font-size: 26px; }
+  .stat-card .stat-label { font-size: 9px; }
+  .stat-card { padding: 14px 8px; }
   .form-row { grid-template-columns: 1fr; }
-  .page-title { font-size: 26px; }
+  .page-title { font-size: 24px; }
+  .hero-elevation-text h2 { font-size: 22px; }
+  .modal { padding: 20px 16px; }
+  .modal-title { font-size: 18px; }
+  .upcoming-banner { flex-direction: column; align-items: flex-start; }
+  .wish-card-actions { flex-direction: column; }
+  .trek-actions { gap: 5px; }
+  .btn { padding: 8px 14px; font-size: 13px; }
+  #worldMapContainer { height: 240px; }
+  .photo-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
 </style>
 </head>
@@ -251,6 +299,14 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
 <div id="syncBar"></div>
 <div id="syncStatus"><span class="sync-dot"></span><span id="syncLabel">Syncing…</span></div>
 
+<!-- MOBILE TOP BAR -->
+<div class="mobile-topbar">
+  <span class="compass-sm">🧭</span>
+  <h1>Summit Stories</h1>
+  <div class="trek-pill" id="mobilePill">0/20</div>
+</div>
+
+<!-- DESKTOP SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-brand">
     <span class="compass">🧭</span>
@@ -260,6 +316,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
   <div class="sidebar-nav">
     <div class="nav-section-label">Explore</div>
     <a class="nav-link active" data-page="page-home"><span class="icon">🏠</span><span>Home</span></a>
+    <a class="nav-link" data-page="page-map"><span class="icon">🌍</span><span>World Map</span></a>
     <a class="nav-link" data-page="page-schedule"><span class="icon">🗺️</span><span>Schedule Trek</span></a>
     <a class="nav-link" data-page="page-wishlist"><span class="icon">⭐</span><span>Wishlist</span></a>
     <div class="nav-section-label" style="margin-top:12px">Memories</div>
@@ -268,13 +325,26 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
   </div>
   <div class="sidebar-footer">
     <div class="trek-counter" id="sidebarCounter">
-      <div class="number">0/0</div>
+      <div class="number">0/20</div>
       <div class="label">Treks Done</div>
     </div>
   </div>
 </nav>
 
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" data-page="page-home"><span class="icon">🏠</span><span class="label">Home</span></button>
+    <button class="mobile-nav-btn" data-page="page-map"><span class="icon">🌍</span><span class="label">Map</span></button>
+    <button class="mobile-nav-btn" data-page="page-schedule"><span class="icon">🗺️</span><span class="label">Treks</span></button>
+    <button class="mobile-nav-btn" data-page="page-wishlist"><span class="icon">⭐</span><span class="label">Wishlist</span></button>
+    <button class="mobile-nav-btn" data-page="page-memories"><span class="icon">📸</span><span class="label">Photos</span></button>
+    <button class="mobile-nav-btn" data-page="page-past"><span class="icon">🏅</span><span class="label">Past</span></button>
+  </div>
+</div>
+
 <main class="main">
+
   <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="hero-elevation">
@@ -286,26 +356,59 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
       <svg id="elevationSvg" viewBox="0 0 400 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div id="nextTrekBanner"></div>
-    <div class="grid-4" style="margin-bottom:28px">
+    <div class="grid-4" style="margin-bottom:24px">
       <div class="stat-card"><div class="stat-value" id="statDone">0</div><div class="stat-label">Completed</div></div>
       <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Scheduled</div></div>
-      <div class="stat-card"><div class="stat-value" id="statWish">0</div><div class="stat-label">On Wishlist</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--trail)" id="goalPct">0%</div><div class="stat-label">Goal Progress</div></div>
+      <div class="stat-card"><div class="stat-value" id="statWish">0</div><div class="stat-label">Wishlist</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--trail)" id="goalPct">0%</div><div class="stat-label">Goal</div></div>
     </div>
-    <div class="card" style="margin-bottom:28px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <span style="font-family:var(--font-display);font-size:18px;font-weight:700">🎯 Trek Goal — 20 Treks Together</span>
+    <div class="card" style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span style="font-family:var(--font-display);font-size:16px;font-weight:700">🎯 Trek Goal — 20 Treks Together</span>
         <span style="font-family:var(--font-mono);font-size:12px;color:var(--trail)" id="goalText">0 of 20</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="goalFill" style="width:0%"></div></div>
     </div>
-    <div class="section-title">📋 Trek Log</div>
+    <div class="section-title">📋 Recent Treks</div>
     <div id="recentActivity"></div>
-    <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+    <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-trail" onclick="navigate('page-schedule')">+ Schedule a Trek</button>
-      <button class="btn btn-outline" onclick="navigate('page-wishlist')">⭐ Add to Wishlist</button>
-      <button class="btn btn-ghost" onclick="navigate('page-memories')">📸 Upload Photos</button>
+      <button class="btn btn-outline" onclick="navigate('page-wishlist')">⭐ Wishlist</button>
+      <button class="btn btn-ghost" onclick="navigate('page-map')">🌍 World Map</button>
     </div>
+  </div>
+
+  <!-- WORLD MAP -->
+  <div class="page" id="page-map">
+    <div class="page-header">
+      <div class="page-eyebrow">Explore the World</div>
+      <h1 class="page-title">Trek World Map</h1>
+      <p class="page-subtitle">Discover moderate treks across the globe. Tap any pin to explore.</p>
+    </div>
+    <div id="worldMapWrap">
+      <div class="map-controls">
+        <input type="text" class="map-search" id="mapSearch" placeholder="🔍 Search treks..." oninput="filterMapTreks(this.value)" />
+        <button class="map-filter-btn active" onclick="setMapFilter('all',this)">All</button>
+        <button class="map-filter-btn" onclick="setMapFilter('India',this)">India</button>
+        <button class="map-filter-btn" onclick="setMapFilter('Nepal',this)">Nepal</button>
+        <button class="map-filter-btn" onclick="setMapFilter('Europe',this)">Europe</button>
+        <button class="map-filter-btn" onclick="setMapFilter('Americas',this)">Americas</button>
+      </div>
+      <div id="worldMapContainer">
+        <svg id="worldMapSvg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="map-tooltip" id="mapTooltip"></div>
+      </div>
+      <div class="map-legend">
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#E8C547"></div>India</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#C4915A"></div>Nepal / Bhutan</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#3D6B3D"></div>Europe</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#5B8DB8"></div>Americas</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#9B6BB5"></div>Africa / Middle East</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#E87040"></div>SE Asia / Pacific</div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:8px">📍 Trek Directory <span style="font-size:14px;font-weight:400;color:var(--stone)" id="mapCountLabel"></span></div>
+    <div class="trek-list-grid" id="trekListGrid"></div>
   </div>
 
   <!-- SCHEDULE -->
@@ -315,7 +418,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
       <h1 class="page-title">Scheduled Treks</h1>
       <p class="page-subtitle">Plan every detail — itinerary, distance, difficulty — so nothing is left to chance on the trail.</p>
     </div>
-    <div style="margin-bottom:24px"><button class="btn btn-trail" onclick="openScheduleModal()">+ Plan a New Trek</button></div>
+    <div style="margin-bottom:20px"><button class="btn btn-trail" onclick="openScheduleModal()">+ Plan a New Trek</button></div>
     <div class="grid-2" id="trekGrid"></div>
   </div>
 
@@ -324,9 +427,9 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
     <div class="page-header">
       <div class="page-eyebrow">Dream Big</div>
       <h1 class="page-title">Trek Wishlist</h1>
-      <p class="page-subtitle">Every summit you're dreaming of — all in one place. Rank them, plan them, conquer them.</p>
+      <p class="page-subtitle">Every summit you're dreaming of — all in one place.</p>
     </div>
-    <div style="margin-bottom:24px"><button class="btn btn-trail" onclick="openWishModal()">⭐ Add Dream Trek</button></div>
+    <div style="margin-bottom:20px"><button class="btn btn-trail" onclick="openWishModal()">⭐ Add Dream Trek</button></div>
     <div id="wishlistContainer"></div>
   </div>
 
@@ -335,10 +438,10 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
     <div class="page-header">
       <div class="page-eyebrow">Your Story</div>
       <h1 class="page-title">Photo Memories</h1>
-      <p class="page-subtitle">Every photo is a moment, every moment is forever. Your gallery of adventures.</p>
+      <p class="page-subtitle">Every photo is a moment, every moment is forever.</p>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-      <select class="form-select" id="memoryFilter" style="width:220px"><option value="all">All Treks</option></select>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <select class="form-select" id="memoryFilter" style="max-width:220px"><option value="all">All Treks</option></select>
       <button class="btn btn-trail" onclick="openPhotoUpload()">📸 Upload Photos</button>
     </div>
     <div class="photo-grid" id="memoriesGrid"></div>
@@ -353,6 +456,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
     </div>
     <div id="pastTreksContainer"></div>
   </div>
+
 </main>
 
 <div id="toast"></div>
@@ -389,11 +493,11 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
       <div class="form-group"><label class="form-label">Tags</label><div class="tags-container" id="tagContainer"><input class="tag-input" id="tagInput" placeholder="Type + Enter..." /></div></div>
       <div class="divider"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <span class="section-title" style="margin-bottom:0;font-size:17px">🗓️ Itinerary</span>
+        <span class="section-title" style="margin-bottom:0;font-size:16px">🗓️ Itinerary</span>
         <button type="button" class="btn btn-ghost" onclick="addItineraryDay()">+ Add Day</button>
       </div>
       <div id="itineraryBuilder"></div>
-      <div style="display:flex;gap:10px;margin-top:20px">
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
         <button type="button" class="btn btn-trail" onclick="saveTrek()">Schedule Trek ✓</button>
         <button type="button" class="btn btn-ghost" onclick="closeModal('scheduleModal')">Cancel</button>
       </div>
@@ -417,7 +521,7 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
       <div class="form-group"><label class="form-label">Approximate Distance</label><input class="form-input" id="wishDistance" placeholder="e.g. 20 km" /></div>
       <div class="form-group"><label class="form-label">Why this trek?</label><textarea class="form-textarea" id="wishDesc" placeholder="What makes this trek special..."></textarea></div>
       <div class="form-group"><label class="form-label">Tags</label><div class="tags-container" id="wishTagContainer"><input class="tag-input" id="wishTagInput" placeholder="Type + Enter..." /></div></div>
-      <div style="display:flex;gap:10px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button type="button" class="btn btn-trail" onclick="saveWish()">Add to Wishlist ⭐</button>
         <button type="button" class="btn btn-ghost" onclick="closeModal('wishModal')">Cancel</button>
       </div>
@@ -435,8 +539,8 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
     <div class="form-group"><label class="form-label">Select Trek</label><select class="form-select" id="photoTrekSelect"></select></div>
     <div class="form-group"><label class="form-label">Caption (optional)</label><input class="form-input" id="photoCaption" placeholder="e.g. Summit at sunrise!" /></div>
     <div class="form-group"><label class="form-label">Choose Photos</label><input type="file" id="photoFileInput" accept="image/*" multiple style="padding:10px;background:var(--mist);border:1.5px dashed var(--mist-dark);border-radius:4px;width:100%;cursor:pointer" /></div>
-    <div id="photoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
-    <div style="display:flex;gap:10px">
+    <div id="photoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-trail" onclick="savePhotos()">Save Photos 📸</button>
       <button class="btn btn-ghost" onclick="closeModal('photoModal')">Cancel</button>
     </div>
@@ -448,12 +552,15 @@ body { font-family: var(--font-body); background: var(--mist); color: var(--fore
   <div class="modal" style="max-width:620px"></div>
 </div>
 
+<!-- MAP TREK DETAIL MODAL -->
+<div class="modal-backdrop" id="mapDetailModal">
+  <div class="modal" style="max-width:520px" id="mapDetailContent"></div>
+</div>
+
 <script type="module">
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // FIREBASE CONFIGURATION
-// Replace these values with your own Firebase project credentials.
-// Get them from: Firebase Console → Project Settings → Your apps → SDK setup
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyBRn4I3EHjoBblxi99L5ENpOpOAmDUNOjA",
   authDomain:        "summit-86e58.firebaseapp.com",
@@ -465,200 +572,162 @@ const FIREBASE_CONFIG = {
   measurementId:     "G-DHW6VC6E1R"
 };
 
-// ─── FIREBASE INIT ────────────────────────────────────────────────────
-import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, child }
-                                   from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+import { initializeApp }      from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue }
+                               from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 const firebaseApp = initializeApp(FIREBASE_CONFIG);
 const db          = getDatabase(firebaseApp);
-const ROOT        = "summit_stories"; // all data lives under this path
+const ROOT        = "summit_stories";
 
-// ─── DB HELPERS ──────────────────────────────────────────────────────
-// dbGet / dbSet mirror the old window.storage API so every caller
-// further down the file works unchanged.
-
+// ─── DB HELPERS ───────────────────────────────────────────────────
 async function dbGet(key) {
   try {
     const snap = await get(ref(db, `${ROOT}/${key}`));
     return snap.exists() ? snap.val() : [];
-  } catch(e) { console.error('dbGet error', e); return []; }
+  } catch(e) { console.error('dbGet', e); return []; }
 }
-
 async function dbSet(key, val) {
-  try {
-    await set(ref(db, `${ROOT}/${key}`), val);
-    flashSync();
-  } catch(e) { console.error('dbSet error', e); }
+  try { await set(ref(db, `${ROOT}/${key}`), val); flashSync(); }
+  catch(e) { console.error('dbSet', e); }
 }
-
 async function dbGetItem(key) {
-  try {
-    const snap = await get(ref(db, `${ROOT}/meta/${key}`));
-    return snap.exists() ? snap.val() : null;
-  } catch { return null; }
+  try { const s = await get(ref(db, `${ROOT}/meta/${key}`)); return s.exists()?s.val():null; }
+  catch { return null; }
 }
-
 async function dbSetItem(key, val) {
-  try { await set(ref(db, `${ROOT}/meta/${key}`), val); }
-  catch(e) { console.error('dbSetItem error', e); }
+  try { await set(ref(db, `${ROOT}/meta/${key}`), val); } catch {}
 }
 
-// ─── SYNC FLASH ───────────────────────────────────────────────────────
+// ─── SYNC ────────────────────────────────────────────────────────
 function flashSync() {
   const bar = document.getElementById('syncBar');
-  bar.classList.add('show');
-  setTimeout(() => bar.classList.remove('show'), 600);
+  bar.classList.add('show'); setTimeout(()=>bar.classList.remove('show'),600);
 }
-
-// ─── LIVE SYNC — Firebase onValue listeners (true real-time) ──────────
-// Instead of polling every 4 s we subscribe to Firebase push updates.
-// The listeners call refreshPage() the instant data changes on the server.
 
 let currentPage = 'page-home';
 
 function startRealtimeListeners() {
   const statusLabel = document.getElementById('syncLabel');
-  const dot         = document.querySelector('.sync-dot');
-
-  // Connection-state indicator
-  const connRef = ref(db, '.info/connected');
-  onValue(connRef, snap => {
-    const online = snap.val() === true;
-    statusLabel.textContent          = online ? 'Live' : 'Offline';
-    dot.style.background             = online ? 'var(--summit)' : 'var(--danger)';
+  const dot = document.querySelector('.sync-dot');
+  onValue(ref(db, '.info/connected'), snap => {
+    const online = snap.val()===true;
+    statusLabel.textContent = online ? 'Live' : 'Offline';
+    dot.style.background = online ? 'var(--summit)' : 'var(--danger)';
   });
-
-  // Treks listener
-  onValue(ref(db, `${ROOT}/treks`), () => {
-    flashSync();
-    refreshPage(currentPage);
-  });
-
-  // Wishlist listener
-  onValue(ref(db, `${ROOT}/wishlist`), () => {
-    flashSync();
-    refreshPage(currentPage);
-  });
+  onValue(ref(db, `${ROOT}/treks`), ()=>{ flashSync(); refreshPage(currentPage); });
+  onValue(ref(db, `${ROOT}/wishlist`), ()=>{ flashSync(); refreshPage(currentPage); });
 }
 
-// ─── SEED DATA ────────────────────────────────────────────────────────
+// ─── SEED ────────────────────────────────────────────────────────
 async function seedDemoData() {
   const seeded = await dbGetItem('seeded');
   if (seeded) return;
-
-  await dbSet('treks', [
-    {
-      id: 'trek_oct2024', title: 'Rajmachi Fort Trek', location: 'Sahyadri Range, Maharashtra',
-      date: '2025-10-18', endDate: '2025-10-19', duration: '2 Days / 1 Night',
-      difficulty: 'Moderate', distance: '14 km', maxAlt: '2710 ft', status: 'upcoming',
-      description: 'Our very first trek together! The iconic Rajmachi with its twin forts Shrivardhan and Manaranjan. Starting from Lonavala via Tungarli.',
-      highlights: ['First trek ever!', 'Twin forts', 'Monsoon greenery', 'Camping under stars'],
-      itinerary: [
-        { title: 'Day 1 – Lonavala to Rajmachi Base', details: 'Morning start from Lonavala station. Trek through dense forest cover. Reach Rajmachi village for lunch. Set up camp by afternoon.' },
-        { title: 'Day 2 – Manaranjan & Descent', details: 'Early morning sunrise at Shrivardhan. Trek to Manaranjan fort. Panoramic views of Sahyadri. Descend back to Lonavala by noon.' }
-      ],
-      photos: [], tags: ['Sahyadri', 'Fort', 'Camping', 'Monsoon', 'First Trek']
-    }
-  ]);
-
+  await dbSet('treks', [{
+    id:'trek_oct2024', title:'Rajmachi Fort Trek', location:'Sahyadri Range, Maharashtra',
+    date:'2025-10-18', endDate:'2025-10-19', duration:'2 Days / 1 Night',
+    difficulty:'Moderate', distance:'14 km', maxAlt:'2710 ft', status:'upcoming',
+    description:'Our very first trek together! The iconic Rajmachi with its twin forts Shrivardhan and Manaranjan. Starting from Lonavala via Tungarli.',
+    highlights:['First trek ever!','Twin forts','Monsoon greenery','Camping under stars'],
+    itinerary:[
+      {title:'Day 1 – Lonavala to Rajmachi Base', details:'Morning start from Lonavala station. Trek through dense forest cover. Reach Rajmachi village for lunch. Set up camp by afternoon.'},
+      {title:'Day 2 – Manaranjan & Descent', details:'Early morning sunrise at Shrivardhan. Trek to Manaranjan fort. Panoramic views of Sahyadri. Descend back to Lonavala by noon.'}
+    ], photos:[], tags:['Sahyadri','Fort','Camping','Monsoon','First Trek']
+  }]);
   await dbSet('wishlist', [
-    { id: 'w1', title: 'Harishchandragad', location: 'Ahmednagar, Maharashtra', difficulty: 'Hard', distance: '20 km', description: 'The iconic Kokan Kada cliff overhang. One of the most dramatic treks in Sahyadri.', priority: 1, tags: ['Cliff', 'Historical', 'Challenging'] },
-    { id: 'w2', title: 'Kalsubai Peak', location: 'Nashik, Maharashtra', difficulty: 'Moderate', distance: '8 km', description: 'Highest peak in Maharashtra at 5400 ft. Iron ladders and spectacular 360° views.', priority: 2, tags: ['Highest Peak', 'Maharashtra', 'Sunrise'] },
-    { id: 'w3', title: 'Alang-Madan-Kulang', location: 'Nashik, Maharashtra', difficulty: 'Hard', distance: '25 km', description: 'The legendary AMK traverse. Three remote forts in a single expedition.', priority: 3, tags: ['Remote', 'Overnight', 'Expert'] },
-    { id: 'w4', title: 'Bhimashankar', location: 'Pune, Maharashtra', difficulty: 'Easy', distance: '12 km', description: 'Sacred Jyotirlinga with lush Bhimashankar wildlife sanctuary forest trail.', priority: 4, tags: ['Wildlife', 'Sacred', 'Forest'] },
-    { id: 'w5', title: 'Sandhan Valley', location: 'Nashik, Maharashtra', difficulty: 'Moderate', distance: '10 km', description: 'The Valley of Shadows. A stunning gorge with rappelling and river crossings.', priority: 5, tags: ['Gorge', 'Rappelling', 'Adventure'] }
+    {id:'w1',title:'Harishchandragad',location:'Ahmednagar, Maharashtra',difficulty:'Hard',distance:'20 km',description:'The iconic Kokan Kada cliff overhang. One of the most dramatic treks in Sahyadri.',priority:1,tags:['Cliff','Historical','Challenging']},
+    {id:'w2',title:'Kalsubai Peak',location:'Nashik, Maharashtra',difficulty:'Moderate',distance:'8 km',description:'Highest peak in Maharashtra at 5400 ft. Iron ladders and spectacular 360° views.',priority:2,tags:['Highest Peak','Maharashtra','Sunrise']},
+    {id:'w3',title:'Alang-Madan-Kulang',location:'Nashik, Maharashtra',difficulty:'Hard',distance:'25 km',description:'The legendary AMK traverse. Three remote forts in a single expedition.',priority:3,tags:['Remote','Overnight','Expert']},
+    {id:'w4',title:'Bhimashankar',location:'Pune, Maharashtra',difficulty:'Easy',distance:'12 km',description:'Sacred Jyotirlinga with lush Bhimashankar wildlife sanctuary forest trail.',priority:4,tags:['Wildlife','Sacred','Forest']},
+    {id:'w5',title:'Sandhan Valley',location:'Nashik, Maharashtra',difficulty:'Moderate',distance:'10 km',description:'The Valley of Shadows. A stunning gorge with rappelling and river crossings.',priority:5,tags:['Gorge','Rappelling','Adventure']}
   ]);
-
   await dbSetItem('seeded', true);
 }
 
-// ─── NAV ─────────────────────────────────────────────────────────────
+// ─── NAV ─────────────────────────────────────────────────────────
 function navigate(pageId) {
   currentPage = pageId;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
   const page = document.getElementById(pageId);
   if (page) { page.classList.add('active'); window.scrollTo(0,0); }
-  document.querySelectorAll('.nav-link').forEach(l => { if (l.dataset.page === pageId) l.classList.add('active'); });
+  document.querySelectorAll('[data-page="'+pageId+'"]').forEach(el=>el.classList.add('active'));
   refreshPage(pageId);
 }
 
 function refreshPage(id) {
-  if (id === 'page-home') renderHome();
-  if (id === 'page-schedule') renderSchedule();
-  if (id === 'page-wishlist') renderWishlist();
-  if (id === 'page-memories') renderMemories();
-  if (id === 'page-past') renderPast();
+  if (id==='page-home') renderHome();
+  if (id==='page-map') renderWorldMap();
+  if (id==='page-schedule') renderSchedule();
+  if (id==='page-wishlist') renderWishlist();
+  if (id==='page-memories') renderMemories();
+  if (id==='page-past') renderPast();
   updateSidebarCounter();
 }
 
-// ─── UTILS ───────────────────────────────────────────────────────────
-function uid() { return 'id_' + Math.random().toString(36).substr(2,9); }
+// ─── UTILS ───────────────────────────────────────────────────────
+function uid() { return 'id_'+Math.random().toString(36).substr(2,9); }
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
 }
 function formatDate(d) {
   if (!d) return '';
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
 }
 function daysUntil(d) {
   if (!d) return null;
-  const now = new Date(); now.setHours(0,0,0,0);
-  return Math.ceil((new Date(d+'T00:00:00') - now) / 86400000);
+  const now=new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((new Date(d+'T00:00:00')-now)/86400000);
 }
 function difficultyBadge(d) {
-  const map = { Easy:'badge-easy', Moderate:'badge-moderate', Hard:'badge-hard', Expert:'badge-hard' };
+  const map={Easy:'badge-easy',Moderate:'badge-moderate',Hard:'badge-hard',Expert:'badge-hard'};
   return `<span class="badge ${map[d]||'badge-moderate'}">${d||'Moderate'}</span>`;
 }
 async function updateSidebarCounter() {
   const treks = await dbGet('treks');
   const done = treks.filter(t=>t.status==='completed').length;
   const el = document.getElementById('sidebarCounter');
-  if (el) el.innerHTML = `<div class="number">${done}/${treks.length}</div><div class="label">Treks Done</div>`;
+  const pill = document.getElementById('mobilePill');
+  if (el) el.innerHTML=`<div class="number">${done}/${treks.length}</div><div class="label">Treks Done</div>`;
+  if (pill) pill.textContent=`${done}/20`;
 }
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// ─── TAG INPUT ───────────────────────────────────────────────────────
+// ─── TAG INPUT ───────────────────────────────────────────────────
 function initTagInput(containerId, inputId, tagsArr) {
-  const container = document.getElementById(containerId);
-  const input = document.getElementById(inputId);
-  if (!container || !input) return;
+  const container=document.getElementById(containerId), input=document.getElementById(inputId);
+  if (!container||!input) return;
   function renderTags() {
-    container.querySelectorAll('.tag').forEach(t => t.remove());
-    tagsArr.forEach((tag, i) => {
-      const el = document.createElement('div'); el.className = 'tag';
-      el.innerHTML = `${tag} <span class="tag-remove" data-i="${i}">×</span>`;
-      container.insertBefore(el, input);
+    container.querySelectorAll('.tag').forEach(t=>t.remove());
+    tagsArr.forEach((tag,i)=>{
+      const el=document.createElement('div'); el.className='tag';
+      el.innerHTML=`${tag} <span class="tag-remove" data-i="${i}">×</span>`;
+      container.insertBefore(el,input);
     });
   }
-  container.addEventListener('click', e => {
-    if (e.target.classList.contains('tag-remove')) { tagsArr.splice(+e.target.dataset.i, 1); renderTags(); }
+  container.addEventListener('click',e=>{
+    if (e.target.classList.contains('tag-remove')){ tagsArr.splice(+e.target.dataset.i,1); renderTags(); }
     else input.focus();
   });
-  input.addEventListener('keydown', e => {
-    if ((e.key==='Enter'||e.key===',') && input.value.trim()) {
-      e.preventDefault(); tagsArr.push(input.value.trim().replace(',','')); input.value=''; renderTags();
-    }
-    if (e.key==='Backspace' && !input.value && tagsArr.length) { tagsArr.pop(); renderTags(); }
+  input.addEventListener('keydown',e=>{
+    if ((e.key==='Enter'||e.key===',')&&input.value.trim()){ e.preventDefault(); tagsArr.push(input.value.trim().replace(',','')); input.value=''; renderTags(); }
+    if (e.key==='Backspace'&&!input.value&&tagsArr.length){ tagsArr.pop(); renderTags(); }
   });
   renderTags();
 }
 
-// ─── ITINERARY ───────────────────────────────────────────────────────
-let itineraryDays = [];
-function addItineraryDay() {
-  itineraryDays.push({ title: `Day ${itineraryDays.length+1}`, details:'' });
-  renderItineraryBuilder();
-}
+// ─── ITINERARY ───────────────────────────────────────────────────
+let itineraryDays=[];
+function addItineraryDay() { itineraryDays.push({title:`Day ${itineraryDays.length+1}`,details:''}); renderItineraryBuilder(); }
 function renderItineraryBuilder() {
-  const c = document.getElementById('itineraryBuilder'); if (!c) return;
-  c.innerHTML = '';
-  itineraryDays.forEach((day, i) => {
-    c.innerHTML += `<div class="itinerary-day">
+  const c=document.getElementById('itineraryBuilder'); if (!c) return;
+  c.innerHTML='';
+  itineraryDays.forEach((day,i)=>{
+    c.innerHTML+=`<div class="itinerary-day">
       <div class="itinerary-day-header">
         <div class="day-badge">${i+1}</div>
         <input class="day-title-input" placeholder="Day ${i+1} title" value="${day.title}" oninput="itineraryDays[${i}].title=this.value"/>
@@ -670,374 +739,541 @@ function renderItineraryBuilder() {
 }
 function removeDay(i) { itineraryDays.splice(i,1); renderItineraryBuilder(); }
 
-// ─── HOME ────────────────────────────────────────────────────────────
+// ─── HOME ────────────────────────────────────────────────────────
 async function renderHome() {
-  const [treks, wishlist] = await Promise.all([dbGet('treks'), dbGet('wishlist')]);
-  const completed = treks.filter(t=>t.status==='completed');
-  const upcoming = treks.filter(t=>t.status==='upcoming').sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  document.getElementById('statDone').textContent = completed.length;
-  document.getElementById('statTotal').textContent = treks.length;
-  document.getElementById('statWish').textContent = wishlist.length;
-
-  const goal = 20, pct = Math.min(100, Math.round(completed.length/goal*100));
-  document.getElementById('goalPct').textContent = pct+'%';
-  document.getElementById('goalFill').style.width = pct+'%';
-  document.getElementById('goalText').textContent = `${completed.length} of ${goal} treks completed`;
-
-  const cb = document.getElementById('nextTrekBanner');
-  if (upcoming.length > 0) {
-    const next = upcoming[0], d = Math.max(0, daysUntil(next.date));
-    cb.innerHTML = `<div class="upcoming-banner">
+  const [treks,wishlist]=await Promise.all([dbGet('treks'),dbGet('wishlist')]);
+  const completed=treks.filter(t=>t.status==='completed');
+  const upcoming=treks.filter(t=>t.status==='upcoming').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('statDone').textContent=completed.length;
+  document.getElementById('statTotal').textContent=treks.length;
+  document.getElementById('statWish').textContent=wishlist.length;
+  const goal=20, pct=Math.min(100,Math.round(completed.length/goal*100));
+  document.getElementById('goalPct').textContent=pct+'%';
+  document.getElementById('goalFill').style.width=pct+'%';
+  document.getElementById('goalText').textContent=`${completed.length} of ${goal} treks completed`;
+  const cb=document.getElementById('nextTrekBanner');
+  if (upcoming.length>0) {
+    const next=upcoming[0], d=Math.max(0,daysUntil(next.date));
+    cb.innerHTML=`<div class="upcoming-banner">
       <div class="upcoming-banner-text"><h3>🏔️ Next Trek: ${next.title}</h3><p>${next.location} • ${formatDate(next.date)}</p></div>
       <div class="countdown">
         <div class="countdown-item"><span class="num">${Math.floor(d/30)}</span><span class="unit">months</span></div>
         <div class="countdown-item"><span class="num">${d%30}</span><span class="unit">days</span></div>
       </div></div>`;
   } else {
-    cb.innerHTML = `<div class="upcoming-banner" style="cursor:pointer" onclick="navigate('page-schedule')">
+    cb.innerHTML=`<div class="upcoming-banner" style="cursor:pointer" onclick="navigate('page-schedule')">
       <div class="upcoming-banner-text"><h3>🗺️ Schedule Your First Trek!</h3><p>No upcoming treks. Time to plan an adventure.</p></div>
       <button class="btn btn-primary" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4)">Plan Now →</button>
     </div>`;
   }
-
-  const actEl = document.getElementById('recentActivity');
-  const recent = [...treks].reverse().slice(0,3);
-  if (recent.length === 0) {
-    actEl.innerHTML = `<div class="empty-state"><span class="emoji">🏕️</span><h3>Your story begins here</h3><p>Schedule your first trek to see it here.</p></div>`;
+  const actEl=document.getElementById('recentActivity');
+  const recent=[...treks].reverse().slice(0,3);
+  if (recent.length===0) {
+    actEl.innerHTML=`<div class="empty-state"><span class="emoji">🏕️</span><h3>Your story begins here</h3><p>Schedule your first trek to see it here.</p></div>`;
   } else {
-    actEl.innerHTML = recent.map(t=>`<div class="wish-card" style="margin-bottom:12px;cursor:pointer" onclick="showTrekDetail('${t.id}')">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <strong style="font-family:var(--font-display);font-size:16px">${t.title}</strong>
+    actEl.innerHTML=recent.map(t=>`<div class="wish-card" style="margin-bottom:10px;cursor:pointer" onclick="showTrekDetail('${t.id}')">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <strong style="font-family:var(--font-display);font-size:15px">${t.title}</strong>
           <span class="badge badge-${t.status}">${t.status}</span>
         </div>
-        <div class="trek-meta-item">📍 ${t.location} &nbsp; 📅 ${formatDate(t.date)}</div>
+        <div class="trek-meta-item">📍 ${t.location} &nbsp;📅 ${formatDate(t.date)}</div>
       </div>${difficultyBadge(t.difficulty)}</div>`).join('');
   }
 }
 
-// ─── SCHEDULE ────────────────────────────────────────────────────────
-let scheduleTags = [];
-
+// ─── SCHEDULE ────────────────────────────────────────────────────
+let scheduleTags=[];
 async function renderSchedule() {
-  const treks = await dbGet('treks');
-  const upcoming = treks.filter(t=>t.status==='upcoming');
-  const container = document.getElementById('trekGrid');
+  const treks=await dbGet('treks');
+  const upcoming=treks.filter(t=>t.status==='upcoming');
+  const container=document.getElementById('trekGrid');
   if (upcoming.length===0) {
-    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="emoji">🗺️</span><h3>No treks scheduled yet</h3><p>Plan your first adventure with the button above!</p></div>`;
-    return;
+    container.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><span class="emoji">🗺️</span><h3>No treks scheduled yet</h3><p>Plan your first adventure with the button above!</p></div>`; return;
   }
-  container.innerHTML = upcoming.map((t,i)=>`
+  container.innerHTML=upcoming.map((t,i)=>`
     <div class="trek-card" onclick="showTrekDetail('${t.id}')">
       <div class="trek-card-header">
         <div class="trek-card-number">${String(i+1).padStart(2,'0')}</div>
         <div class="trek-card-title">${t.title}</div>
       </div>
       <div class="trek-card-body">
-        <div class="trek-meta">${difficultyBadge(t.difficulty)}<span class="trek-meta-item">📍 ${t.location}</span><span class="trek-meta-item">📅 ${formatDate(t.date)}</span><span class="trek-meta-item">⏱️ ${t.duration||'—'}</span><span class="trek-meta-item">📏 ${t.distance||'—'}</span></div>
-        <p style="font-size:13px;color:var(--stone);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${t.description||''}</p>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${(t.tags||[]).map(tag=>`<span class="badge badge-wishlist">${tag}</span>`).join('')}</div>
+        <div class="trek-meta">${difficultyBadge(t.difficulty)}<span class="trek-meta-item">📍 ${t.location}</span><span class="trek-meta-item">📅 ${formatDate(t.date)}</span><span class="trek-meta-item">📏 ${t.distance||'—'}</span></div>
+        <p style="font-size:12px;color:var(--stone);margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${t.description||''}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${(t.tags||[]).map(tag=>`<span class="badge badge-wishlist">${tag}</span>`).join('')}</div>
         <div class="trek-actions" onclick="event.stopPropagation()">
-          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="showTrekDetail('${t.id}')">View Details</button>
-          <button class="btn btn-outline" style="font-size:12px;padding:7px 14px" onclick="markComplete('${t.id}')">Mark Done ✓</button>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 10px" onclick="deleteTrek('${t.id}')">🗑</button>
+          <button class="btn btn-primary" style="font-size:11px;padding:7px 12px" onclick="showTrekDetail('${t.id}')">Details</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:7px 12px" onclick="markComplete('${t.id}')">Done ✓</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:7px 10px" onclick="deleteTrek('${t.id}')">🗑</button>
         </div>
       </div>
     </div>`).join('');
 }
-
 function openScheduleModal() {
-  scheduleTags = []; itineraryDays = [];
-  ['trekTitle','trekLocation','trekDate','trekEndDate','trekDuration','trekDistance','trekAlt','trekDesc','trekHighlights'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('trekDifficulty').value = 'Moderate';
-  renderItineraryBuilder();
-  initTagInput('tagContainer','tagInput',scheduleTags);
+  scheduleTags=[]; itineraryDays=[];
+  ['trekTitle','trekLocation','trekDate','trekEndDate','trekDuration','trekDistance','trekAlt','trekDesc','trekHighlights'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('trekDifficulty').value='Moderate';
+  renderItineraryBuilder(); initTagInput('tagContainer','tagInput',scheduleTags);
   openModal('scheduleModal');
 }
-
 async function saveTrek() {
-  const get = id => document.getElementById(id)?.value?.trim()||'';
-  const title = get('trekTitle');
-  if (!title) { toast('Please enter a trek name'); return; }
-  const trek = {
-    id: uid(), title, location: get('trekLocation'), date: get('trekDate'), endDate: get('trekEndDate'),
-    duration: get('trekDuration'), difficulty: get('trekDifficulty'), distance: get('trekDistance'),
-    maxAlt: get('trekAlt'), description: get('trekDesc'),
-    highlights: get('trekHighlights').split('\n').map(s=>s.trim()).filter(Boolean),
-    itinerary: itineraryDays.map(d=>({title:d.title, details:d.details})),
-    photos: [], tags: [...scheduleTags], status: 'upcoming'
-  };
-  const treks = await dbGet('treks');
-  treks.push(trek);
-  await dbSet('treks', treks);
-  closeModal('scheduleModal');
-  toast('✅ Trek scheduled! Adventure awaits!');
-  renderSchedule(); updateSidebarCounter();
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const title=g('trekTitle'); if (!title){toast('Please enter a trek name');return;}
+  const trek={id:uid(),title,location:g('trekLocation'),date:g('trekDate'),endDate:g('trekEndDate'),
+    duration:g('trekDuration'),difficulty:g('trekDifficulty'),distance:g('trekDistance'),
+    maxAlt:g('trekAlt'),description:g('trekDesc'),
+    highlights:g('trekHighlights').split('\n').map(s=>s.trim()).filter(Boolean),
+    itinerary:itineraryDays.map(d=>({title:d.title,details:d.details})),
+    photos:[],tags:[...scheduleTags],status:'upcoming'};
+  const treks=await dbGet('treks'); treks.push(trek);
+  await dbSet('treks',treks); closeModal('scheduleModal');
+  toast('✅ Trek scheduled! Adventure awaits!'); renderSchedule(); updateSidebarCounter();
 }
-
 async function markComplete(id) {
-  const treks = await dbGet('treks');
-  const trek = treks.find(t=>t.id===id);
-  if (!trek) return;
-  trek.status = 'completed'; trek.completedDate = new Date().toISOString().split('T')[0];
-  await dbSet('treks', treks);
-  toast('🎉 Trek completed! Amazing achievement!');
+  const treks=await dbGet('treks'); const trek=treks.find(t=>t.id===id); if (!trek) return;
+  trek.status='completed'; trek.completedDate=new Date().toISOString().split('T')[0];
+  await dbSet('treks',treks); toast('🎉 Trek completed! Amazing achievement!');
   renderSchedule(); updateSidebarCounter();
 }
-
 async function deleteTrek(id) {
   if (!confirm('Remove this trek?')) return;
-  const treks = await dbGet('treks');
-  await dbSet('treks', treks.filter(t=>t.id!==id));
+  const treks=await dbGet('treks'); await dbSet('treks',treks.filter(t=>t.id!==id));
   toast('Trek removed.'); renderSchedule(); updateSidebarCounter();
 }
 
-// ─── DETAIL ──────────────────────────────────────────────────────────
+// ─── DETAIL ──────────────────────────────────────────────────────
 async function showTrekDetail(id) {
-  const treks = await dbGet('treks');
-  const trek = treks.find(t=>t.id===id); if (!trek) return;
-  const modal = document.getElementById('detailModal');
-  modal.querySelector('.modal').innerHTML = `
+  const treks=await dbGet('treks'); const trek=treks.find(t=>t.id===id); if (!trek) return;
+  const modal=document.getElementById('detailModal');
+  modal.querySelector('.modal').innerHTML=`
     <div class="modal-header">
       <div><div class="page-eyebrow">${trek.status==='completed'?'✅ Completed':'📅 Upcoming'} • ${formatDate(trek.date)}</div><h2 class="modal-title">${trek.title}</h2></div>
       <button class="modal-close" onclick="closeModal('detailModal')">×</button>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
       ${difficultyBadge(trek.difficulty)}<span class="badge badge-upcoming">📍 ${trek.location}</span>
       ${trek.distance?`<span class="badge badge-wishlist">📏 ${trek.distance}</span>`:''}
       ${trek.maxAlt?`<span class="badge badge-wishlist">⛰️ ${trek.maxAlt}</span>`:''}
       ${trek.duration?`<span class="badge badge-wishlist">⏱️ ${trek.duration}</span>`:''}
     </div>
-    ${trek.description?`<p style="font-size:14px;color:var(--stone);margin-bottom:16px;line-height:1.7">${trek.description}</p>`:''}
-    ${trek.highlights?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:10px">✨ Highlights</h4><ul style="padding-left:18px;display:flex;flex-direction:column;gap:5px">${trek.highlights.map(h=>`<li style="font-size:14px;color:var(--stone)">${h}</li>`).join('')}</ul>`:''}
-    ${trek.itinerary?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:16px">🗓️ Itinerary</h4><div class="detail-itinerary">${trek.itinerary.map(d=>`<div class="detail-day"><h4>${d.title}</h4><p>${d.details||'Details to be updated.'}</p></div>`).join('')}</div>`:''}
-    ${trek.tags?.length?`<div class="divider"></div><div style="display:flex;flex-wrap:wrap;gap:6px">${trek.tags.map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>`:''}
+    ${trek.description?`<p style="font-size:13px;color:var(--stone);margin-bottom:14px;line-height:1.7">${trek.description}</p>`:''}
+    ${trek.highlights?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:10px">✨ Highlights</h4><ul style="padding-left:18px;display:flex;flex-direction:column;gap:4px">${trek.highlights.map(h=>`<li style="font-size:13px;color:var(--stone)">${h}</li>`).join('')}</ul>`:''}
+    ${trek.itinerary?.length?`<div class="divider"></div><h4 style="font-family:var(--font-display);font-weight:700;margin-bottom:14px">🗓️ Itinerary</h4><div class="detail-itinerary">${trek.itinerary.map(d=>`<div class="detail-day"><h4>${d.title}</h4><p>${d.details||'Details to be updated.'}</p></div>`).join('')}</div>`:''}
+    ${trek.tags?.length?`<div class="divider"></div><div style="display:flex;flex-wrap:wrap;gap:5px">${trek.tags.map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>`:''}
     <div class="divider"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      ${trek.status==='upcoming'?`<button class="btn btn-trail" onclick="markComplete('${trek.id}');closeModal('detailModal')">Mark as Completed ✓</button>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${trek.status==='upcoming'?`<button class="btn btn-trail" onclick="markComplete('${trek.id}');closeModal('detailModal')">Mark Completed ✓</button>`:''}
       <button class="btn btn-outline" onclick="closeModal('detailModal');navigate('page-memories')">📸 Add Photos</button>
       <button class="btn btn-ghost" onclick="deleteTrek('${trek.id}');closeModal('detailModal')">🗑 Remove</button>
     </div>`;
   openModal('detailModal');
 }
 
-// ─── WISHLIST ────────────────────────────────────────────────────────
-let wishTags = [];
-
+// ─── WISHLIST ────────────────────────────────────────────────────
+let wishTags=[];
 async function renderWishlist() {
-  const list = (await dbGet('wishlist')).sort((a,b)=>a.priority-b.priority);
-  const container = document.getElementById('wishlistContainer');
+  const list=(await dbGet('wishlist')).sort((a,b)=>a.priority-b.priority);
+  const container=document.getElementById('wishlistContainer');
   if (list.length===0) {
-    container.innerHTML = `<div class="empty-state"><span class="emoji">⭐</span><h3>Your bucket list awaits</h3><p>Add treks you dream of doing!</p><button class="btn btn-trail" onclick="openWishModal()">+ Add Dream Trek</button></div>`;
-    return;
+    container.innerHTML=`<div class="empty-state"><span class="emoji">⭐</span><h3>Your bucket list awaits</h3><p>Add treks you dream of doing!</p><button class="btn btn-trail" onclick="openWishModal()">+ Add Dream Trek</button></div>`; return;
   }
-  container.innerHTML = list.map((w,i)=>`
-    <div class="wish-card" style="margin-bottom:12px">
+  container.innerHTML=list.map((w,i)=>`
+    <div class="wish-card" style="margin-bottom:10px">
       <div class="wish-card-rank">${String(i+1).padStart(2,'0')}</div>
       <div class="wish-card-info">
         <h3>${w.title}</h3>
-        <p>📍 ${w.location||'—'} &nbsp; ${w.distance?`📏 ${w.distance}`:''}</p>
-        ${w.description?`<p style="margin-top:6px;font-size:12px;color:var(--stone)">${w.description}</p>`:''}
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">${difficultyBadge(w.difficulty)}${(w.tags||[]).map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>
+        <p>📍 ${w.location||'—'} ${w.distance?`• 📏 ${w.distance}`:''}</p>
+        ${w.description?`<p style="margin-top:5px;font-size:11px;color:var(--stone)">${w.description}</p>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:7px">${difficultyBadge(w.difficulty)}${(w.tags||[]).map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}</div>
       </div>
       <div class="wish-card-actions">
-        <button class="btn btn-outline" style="font-size:12px;padding:7px 12px" onclick="convertToTrek('${w.id}')">Plan it →</button>
-        <button class="btn btn-ghost" style="padding:7px 10px" onclick="deleteWish('${w.id}')">🗑</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:6px 10px" onclick="convertToTrek('${w.id}')">Plan →</button>
+        <button class="btn btn-ghost" style="padding:6px 8px" onclick="deleteWish('${w.id}')">🗑</button>
       </div>
     </div>`).join('');
 }
-
 function openWishModal() {
-  wishTags = [];
+  wishTags=[];
   ['wishTitle','wishLocation','wishDistance','wishDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('wishDifficulty').value='Moderate';
-  initTagInput('wishTagContainer','wishTagInput',wishTags);
-  openModal('wishModal');
+  initTagInput('wishTagContainer','wishTagInput',wishTags); openModal('wishModal');
 }
-
 async function saveWish() {
-  const get = id => document.getElementById(id)?.value?.trim()||'';
-  const title = get('wishTitle');
-  if (!title) { toast('Please enter a trek name'); return; }
-  const list = await dbGet('wishlist');
-  list.push({ id:uid(), title, location:get('wishLocation'), difficulty:get('wishDifficulty'), distance:get('wishDistance'), description:get('wishDesc'), priority:list.length+1, tags:[...wishTags] });
-  await dbSet('wishlist', list);
-  closeModal('wishModal'); toast('⭐ Added to wishlist!'); renderWishlist();
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const title=g('wishTitle'); if (!title){toast('Please enter a trek name');return;}
+  const list=await dbGet('wishlist');
+  list.push({id:uid(),title,location:g('wishLocation'),difficulty:g('wishDifficulty'),distance:g('wishDistance'),description:g('wishDesc'),priority:list.length+1,tags:[...wishTags]});
+  await dbSet('wishlist',list); closeModal('wishModal'); toast('⭐ Added to wishlist!'); renderWishlist();
 }
-
 async function deleteWish(id) {
   if (!confirm('Remove from wishlist?')) return;
-  const list = await dbGet('wishlist');
-  await dbSet('wishlist', list.filter(w=>w.id!==id));
-  toast('Removed from wishlist.'); renderWishlist();
+  const list=await dbGet('wishlist');
+  await dbSet('wishlist',list.filter(w=>w.id!==id)); toast('Removed from wishlist.'); renderWishlist();
 }
-
 async function convertToTrek(id) {
-  const list = await dbGet('wishlist');
-  const wish = list.find(w=>w.id===id); if (!wish) return;
-  closeModal('wishModal');
-  navigate('page-schedule');
-  setTimeout(() => {
+  const list=await dbGet('wishlist'); const wish=list.find(w=>w.id===id); if (!wish) return;
+  closeModal('wishModal'); navigate('page-schedule');
+  setTimeout(()=>{
     openScheduleModal();
-    document.getElementById('trekTitle').value = wish.title;
-    document.getElementById('trekLocation').value = wish.location||'';
-    document.getElementById('trekDifficulty').value = wish.difficulty||'Moderate';
-    document.getElementById('trekDistance').value = wish.distance||'';
-    document.getElementById('trekDesc').value = wish.description||'';
+    document.getElementById('trekTitle').value=wish.title;
+    document.getElementById('trekLocation').value=wish.location||'';
+    document.getElementById('trekDifficulty').value=wish.difficulty||'Moderate';
+    document.getElementById('trekDistance').value=wish.distance||'';
+    document.getElementById('trekDesc').value=wish.description||'';
     wish.tags?.forEach(t=>scheduleTags.push(t));
     initTagInput('tagContainer','tagInput',scheduleTags);
     toast('📋 Loaded from wishlist — set a date to schedule!');
-  }, 200);
+  },200);
 }
 
-// ─── MEMORIES ────────────────────────────────────────────────────────
+// ─── MEMORIES ────────────────────────────────────────────────────
 async function renderMemories() {
-  const treks = await dbGet('treks');
-  const filterEl = document.getElementById('memoryFilter');
-  filterEl.innerHTML = `<option value="all">All Treks</option>` + treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+  const treks=await dbGet('treks');
+  const filterEl=document.getElementById('memoryFilter');
+  filterEl.innerHTML=`<option value="all">All Treks</option>`+treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
   displayMemories(filterEl.value||'all');
 }
-
 async function displayMemories(filterVal) {
-  const treks = await dbGet('treks');
-  const container = document.getElementById('memoriesGrid');
-  let photos = [];
-  treks.forEach(t => {
-    if (filterVal!=='all' && t.id!==filterVal) return;
-    (t.photos||[]).forEach(p=>photos.push({...p, trekTitle:t.title, trekId:t.id}));
+  const treks=await dbGet('treks'); const container=document.getElementById('memoriesGrid');
+  let photos=[];
+  treks.forEach(t=>{
+    if (filterVal!=='all'&&t.id!==filterVal) return;
+    (t.photos||[]).forEach(p=>photos.push({...p,trekTitle:t.title,trekId:t.id}));
   });
-  if (photos.length===0) {
-    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="emoji">📸</span><h3>No memories yet</h3><p>Upload photos from your treks to build your gallery!</p></div>`;
-    return;
-  }
-  container.innerHTML = photos.map(p=>`
+  if (photos.length===0){container.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><span class="emoji">📸</span><h3>No memories yet</h3><p>Upload photos from your treks to build your gallery!</p></div>`;return;}
+  container.innerHTML=photos.map(p=>`
     <div class="photo-item" onclick="openLightbox('${p.data}')">
       <img src="${p.data}" alt="${p.caption||p.trekTitle}" loading="lazy" />
       <div class="photo-overlay"><span>${p.caption||p.trekTitle}</span></div>
       <button class="photo-delete" onclick="event.stopPropagation();deletePhoto('${p.trekId}','${p.id}')">×</button>
     </div>`).join('');
 }
-
 async function openPhotoUpload() {
-  const treks = await dbGet('treks');
-  if (treks.length===0) { toast('Schedule a trek first!'); return; }
-  document.getElementById('photoTrekSelect').innerHTML = treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
-  document.getElementById('photoCaption').value = '';
-  document.getElementById('photoFileInput').value = '';
-  document.getElementById('photoPreview').innerHTML = '';
+  const treks=await dbGet('treks');
+  if (treks.length===0){toast('Schedule a trek first!');return;}
+  document.getElementById('photoTrekSelect').innerHTML=treks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+  document.getElementById('photoCaption').value='';
+  document.getElementById('photoFileInput').value='';
+  document.getElementById('photoPreview').innerHTML='';
   openModal('photoModal');
 }
-
-let pendingPhotoFiles = [];
+let pendingPhotoFiles=[];
 function handlePhotoFiles(files) {
-  pendingPhotoFiles = [];
-  const preview = document.getElementById('photoPreview'); preview.innerHTML = '';
-  Array.from(files).slice(0,12).forEach(file => {
+  pendingPhotoFiles=[]; const preview=document.getElementById('photoPreview'); preview.innerHTML='';
+  Array.from(files).slice(0,12).forEach(file=>{
     if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
+    const reader=new FileReader();
+    reader.onload=e=>{
       pendingPhotoFiles.push(e.target.result);
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.style.cssText = 'width:70px;height:70px;object-fit:cover;border-radius:4px;border:2px solid var(--forest)';
+      const img=document.createElement('img'); img.src=e.target.result;
+      img.style.cssText='width:64px;height:64px;object-fit:cover;border-radius:4px;border:2px solid var(--forest)';
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
   });
 }
-
 async function savePhotos() {
-  if (pendingPhotoFiles.length===0) { toast('Please select photos'); return; }
-  const trekId = document.getElementById('photoTrekSelect').value;
-  const caption = document.getElementById('photoCaption').value.trim();
-  const treks = await dbGet('treks');
-  const trek = treks.find(t=>t.id===trekId); if (!trek) return;
-  pendingPhotoFiles.forEach(data => {
-    trek.photos = trek.photos||[];
-    trek.photos.push({ id:uid(), data, caption, date:new Date().toISOString() });
-  });
-  await dbSet('treks', treks);
-  closeModal('photoModal');
-  toast(`📸 ${pendingPhotoFiles.length} photo(s) added!`);
-  pendingPhotoFiles = [];
+  if (pendingPhotoFiles.length===0){toast('Please select photos');return;}
+  const trekId=document.getElementById('photoTrekSelect').value;
+  const caption=document.getElementById('photoCaption').value.trim();
+  const treks=await dbGet('treks'); const trek=treks.find(t=>t.id===trekId); if (!trek) return;
+  pendingPhotoFiles.forEach(data=>{trek.photos=trek.photos||[]; trek.photos.push({id:uid(),data,caption,date:new Date().toISOString()});});
+  await dbSet('treks',treks); closeModal('photoModal');
+  toast(`📸 ${pendingPhotoFiles.length} photo(s) added!`); pendingPhotoFiles=[];
   displayMemories(document.getElementById('memoryFilter').value||'all');
 }
-
 async function deletePhoto(trekId, photoId) {
   if (!confirm('Delete this photo?')) return;
-  const treks = await dbGet('treks');
-  const trek = treks.find(t=>t.id===trekId);
-  if (trek) { trek.photos = trek.photos.filter(p=>p.id!==photoId); await dbSet('treks', treks); }
-  toast('Photo deleted.');
-  displayMemories(document.getElementById('memoryFilter').value||'all');
+  const treks=await dbGet('treks'); const trek=treks.find(t=>t.id===trekId);
+  if (trek){trek.photos=trek.photos.filter(p=>p.id!==photoId);await dbSet('treks',treks);}
+  toast('Photo deleted.'); displayMemories(document.getElementById('memoryFilter').value||'all');
 }
+function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
-function openLightbox(src) { document.getElementById('lightboxImg').src=src; document.getElementById('lightbox').classList.add('open'); }
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-
-// ─── PAST TREKS ──────────────────────────────────────────────────────
+// ─── PAST TREKS ──────────────────────────────────────────────────
 async function renderPast() {
-  const treks = (await dbGet('treks')).filter(t=>t.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const container = document.getElementById('pastTreksContainer');
-  document.getElementById('pastCount').textContent = treks.length+' treks completed';
-  if (treks.length===0) {
-    container.innerHTML = `<div class="empty-state"><span class="emoji">🏅</span><h3>No completed treks yet</h3><p>Your first completed trek will appear here.</p></div>`;
-    return;
-  }
-  container.innerHTML = treks.map((t,i)=>`
-    <div class="card" style="margin-bottom:16px;cursor:pointer" onclick="showTrekDetail('${t.id}')">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-            <span style="font-family:var(--font-mono);font-size:11px;color:var(--trail)">#${String(i+1).padStart(2,'0')}</span>
-            <h3 style="font-family:var(--font-display);font-size:20px;font-weight:700">${t.title}</h3>
-            <span class="badge badge-completed">✓ Completed</span>
-          </div>
-          <div class="trek-meta">
-            <span class="trek-meta-item">📍 ${t.location}</span>
-            <span class="trek-meta-item">📅 ${formatDate(t.date)}</span>
-            ${t.duration?`<span class="trek-meta-item">⏱️ ${t.duration}</span>`:''}
-            ${t.distance?`<span class="trek-meta-item">📏 ${t.distance}</span>`:''}
-          </div>
-          ${t.description?`<p style="font-size:13px;color:var(--stone);margin-top:8px;max-width:500px">${t.description}</p>`:''}
+  const treks=(await dbGet('treks')).filter(t=>t.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const container=document.getElementById('pastTreksContainer');
+  document.getElementById('pastCount').textContent=treks.length+' treks completed';
+  if (treks.length===0){container.innerHTML=`<div class="empty-state"><span class="emoji">🏅</span><h3>No completed treks yet</h3><p>Your first completed trek will appear here.</p></div>`;return;}
+  container.innerHTML=treks.map((t,i)=>`
+    <div class="past-trek-item" onclick="showTrekDetail('${t.id}')">
+      <div class="past-num">${String(i+1).padStart(2,'0')}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <h3 style="font-family:var(--font-display);font-size:18px;font-weight:700">${t.title}</h3>
+          <span class="badge badge-completed">✓ Completed</span>
         </div>
-        <div style="text-align:right;flex-shrink:0">${difficultyBadge(t.difficulty)}</div>
+        <div class="trek-meta">
+          <span class="trek-meta-item">📍 ${t.location}</span>
+          <span class="trek-meta-item">📅 ${formatDate(t.date)}</span>
+          ${t.duration?`<span class="trek-meta-item">⏱️ ${t.duration}</span>`:''}
+          ${t.distance?`<span class="trek-meta-item">📏 ${t.distance}</span>`:''}
+        </div>
+        ${t.description?`<p style="font-size:12px;color:var(--stone);margin-top:6px">${t.description}</p>`:''}
       </div>
+      <div>${difficultyBadge(t.difficulty)}</div>
     </div>`).join('');
 }
 
-// ─── ELEVATION SVG ───────────────────────────────────────────────────
+// ─── ELEVATION SVG ───────────────────────────────────────────────
 function drawElevation() {
-  const svg = document.getElementById('elevationSvg'); if (!svg) return;
-  const pts = [0,15,8,45,30,20,55,60,70,40,85,70,100,50].map((v,i)=>i%2===0?v*4:130-v*1.2);
-  let d = `M ${pts[0]},${pts[1]}`;
+  const svg=document.getElementById('elevationSvg'); if (!svg) return;
+  const pts=[0,15,8,45,30,20,55,60,70,40,85,70,100,50].map((v,i)=>i%2===0?v*4:130-v*1.2);
+  let d=`M ${pts[0]},${pts[1]}`;
   for (let i=2;i<pts.length;i+=2) d+=` L ${pts[i]},${pts[i+1]}`;
-  svg.innerHTML = `<polyline points="${pts.reduce((a,v,i)=>a+(i%2===0?'\n':',')+v,'').trim()}" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linejoin="round"/>
+  svg.innerHTML=`<polyline points="${pts.reduce((a,v,i)=>a+(i%2===0?'\n':',')+v,'').trim()}" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linejoin="round"/>
     <circle cx="${pts[pts.length-2]}" cy="${pts[pts.length-1]}" r="5" fill="#E8C547"/>`;
 }
 
-// ─── EXPOSE GLOBALS (required because this is a module script) ────────
-// HTML onclick="..." attributes only reach window-level names.
-// We assign every function used inline in the HTML markup to window.
+// ═══════════════════════════════════════════════════════════════════
+// WORLD MAP DATA — Moderate treks, max ~8-10 per country
+// ═══════════════════════════════════════════════════════════════════
+const WORLD_TREKS = [
+  // INDIA
+  {id:'in1',name:'Rajmachi Fort Trek',country:'India',region:'India',lat:18.77,lng:73.47,distance:'14 km',altitude:'825 m',duration:'2D/1N',desc:'Twin forts Shrivardhan & Manaranjan with Sahyadri panoramas. Classic Lonavala weekend trek.',tags:['Fort','Monsoon','Camping'],color:'#E8C547'},
+  {id:'in2',name:'Kalsubai Peak',country:'India',region:'India',lat:19.60,lng:73.72,distance:'8 km',altitude:'1646 m',duration:'1 Day',desc:"Maharashtra's highest peak with iron ladders and 360° views. Popular sunrise trek.",tags:['Highest Peak','Sunrise','Maharashtra'],color:'#E8C547'},
+  {id:'in3',name:'Sandhan Valley',country:'India',region:'India',lat:19.55,lng:73.75,distance:'10 km',altitude:'900 m',duration:'2D/1N',desc:"The Valley of Shadows — a stunning gorge with rappelling and river crossings through Sahyadri.",tags:['Gorge','Rappelling','Adventure'],color:'#E8C547'},
+  {id:'in4',name:'Chopta Tungnath',country:'India',region:'India',lat:30.49,lng:79.22,distance:'8 km',altitude:'3680 m',duration:'2D/1N',desc:"Mini Switzerland of Uttarakhand. Highest Shiva temple in the world, golden meadows.",tags:['Meadow','Spiritual','Himalaya'],color:'#E8C547'},
+  {id:'in5',name:'Kedarkantha',country:'India',region:'India',lat:31.07,lng:78.17,distance:'13 km',altitude:'3800 m',duration:'4D/3N',desc:"Uttarakhand's favourite winter summit. Snow-capped views of Swargarohini, Bandarpunch & Kala Nag.",tags:['Snow','Winter','Summit'],color:'#E8C547'},
+  {id:'in6',name:'Triund Trek',country:'India',region:'India',lat:32.27,lng:76.38,distance:'9 km',altitude:'2827 m',duration:'2D/1N',desc:'Dhauladhar range views from a high ridge. Perfect moonlit campsite above McLeod Ganj.',tags:['Camping','Dhauladhar','Himachal'],color:'#E8C547'},
+  {id:'in7',name:'Dzükou Valley',country:'India',region:'India',lat:25.48,lng:94.08,distance:'12 km',altitude:'2438 m',duration:'3D/2N',desc:'Valley of Flowers of the Northeast. Seasonal wildflowers and rolling green valleys in Nagaland.',tags:['Wildflowers','Northeast','Valley'],color:'#E8C547'},
+  {id:'in8',name:'Kumara Parvatha',country:'India',region:'India',lat:12.71,lng:75.69,distance:'20 km',altitude:'1712 m',duration:'2D/1N',desc:"Karnataka's most challenging moderate trek. Dense Pushpagiri forest, stunning Shola grasslands.",tags:['Karnataka','Forest','Shola'],color:'#E8C547'},
+
+  // NEPAL
+  {id:'np1',name:'Poon Hill Trek',country:'Nepal',region:'Nepal / Bhutan',lat:28.40,lng:83.69,distance:'45 km',altitude:'3210 m',duration:'4D/3N',desc:'Classic short Annapurna circuit. Sunrise over Dhaulagiri, Annapurna & Machhapuchchhre (Fishtail).',tags:['Annapurna','Sunrise','Himalaya'],color:'#C4915A'},
+  {id:'np2',name:'Mardi Himal Trek',country:'Nepal',region:'Nepal / Bhutan',lat:28.44,lng:83.93,distance:'50 km',altitude:'4500 m',duration:'7D/6N',desc:'A hidden gem — less crowded Annapurna route with close-up views of Mardi Himal & Fishtail.',tags:['Off-beat','Annapurna','Ridge'],color:'#C4915A'},
+  {id:'np3',name:'Langtang Valley Trek',country:'Nepal',region:'Nepal / Bhutan',lat:28.21,lng:85.61,distance:'65 km',altitude:'3870 m',duration:'7D/6N',desc:"Nepal's closest Himalayan valley trek from Kathmandu. Yak farms, glaciers and Tibetan culture.",tags:['Valley','Glacier','Culture'],color:'#C4915A'},
+  {id:'np4',name:'Pikey Peak Trek',country:'Nepal',region:'Nepal / Bhutan',lat:27.48,lng:86.56,distance:'40 km',altitude:'4065 m',duration:'5D/4N',desc:"Often called the best Everest panorama in Nepal. Sir Edmund Hillary's favorite viewpoint.",tags:['Everest View','Sunrise','Solukhumbu'],color:'#C4915A'},
+  {id:'np5',name:'Mohare Danda Trek',country:'Nepal',region:'Nepal / Bhutan',lat:28.35,lng:83.55,distance:'42 km',altitude:'3300 m',duration:'5D/4N',desc:'Community-run eco-trek with stunning Annapurna panoramas and authentic village life.',tags:['Eco-Trek','Community','Annapurna'],color:'#C4915A'},
+
+  // EUROPE
+  {id:'eu1',name:'Cinque Terre Coastal Path',country:'Italy',region:'Europe',lat:44.13,lng:9.71,distance:'12 km',altitude:'200 m',duration:'1 Day',desc:'Five colorful cliffside villages linked by a spectacular trail above the Ligurian Sea.',tags:['Coastal','Italy','Scenic'],color:'#3D6B3D'},
+  {id:'eu2',name:'Tour du Mont Blanc (Section)',country:'France/Italy',region:'Europe',lat:45.92,lng:6.87,distance:'25 km',altitude:'2665 m',duration:'3D/2N',desc:"One of Europe's greatest mountain circuits. Glaciers, alpine meadows and iconic Mont Blanc views.",tags:['Alps','Glacier','Classic'],color:'#3D6B3D'},
+  {id:'eu3',name:'GR20 Corsica (North)',country:'France',region:'Europe',lat:42.39,lng:8.96,distance:'80 km',altitude:'2706 m',duration:'8D/7N',desc:"Europe's toughest marked trail. Granite ridges, remote refuges, and wild island wilderness.",tags:['France','Granite','Epic'],color:'#3D6B3D'},
+  {id:'eu4',name:'Laugavegur Trail',country:'Iceland',region:'Europe',lat:63.98,lng:-19.05,distance:'55 km',altitude:'1116 m',duration:'4D/3N',desc:'Iceland\'s famous highland trail. Lava fields, hot springs, rhyolite mountains and endless vistas.',tags:['Iceland','Volcanic','Lava'],color:'#3D6B3D'},
+  {id:'eu5',name:'Picos de Europa Circuit',country:'Spain',region:'Europe',lat:43.18,lng:-4.86,distance:'40 km',altitude:'2519 m',duration:'5D/4N',desc:'Dramatic limestone karst in northern Spain. Deep gorges, endemic wildlife and Asturian culture.',tags:['Spain','Karst','Gorge'],color:'#3D6B3D'},
+  {id:'eu6',name:'Snowdon via Pyg Track',country:'Wales',region:'Europe',lat:53.07,lng:-4.08,distance:'11 km',altitude:'1085 m',duration:'1 Day',desc:"Wales's highest summit via the classic Pyg Track. Rocky ridgeline with Irish Sea views.",tags:['Wales','Summit','Classic'],color:'#3D6B3D'},
+  {id:'eu7',name:'Julian Alps — Lake Bohinj',country:'Slovenia',region:'Europe',lat:46.28,lng:13.87,distance:'16 km',altitude:'1800 m',duration:'1 Day',desc:'Emerald alpine lake trail in Triglav National Park. One of Europe\'s most beautiful mountain lakes.',tags:['Slovenia','Lake','Alps'],color:'#3D6B3D'},
+  {id:'eu8',name:'Dolomites Alta Via 1',country:'Italy',region:'Europe',lat:46.59,lng:12.14,distance:'120 km',altitude:'2752 m',duration:'8D/7N',desc:'Iconic multi-day trek through the UNESCO Dolomites. Towering spires, rifugios and via ferratas.',tags:['Dolomites','Rifugio','Italy'],color:'#3D6B3D'},
+
+  // AMERICAS
+  {id:'am1',name:'Inca Trail',country:'Peru',region:'Americas',lat:-13.16,lng:-72.54,distance:'43 km',altitude:'4215 m',duration:'4D/3N',desc:"The world's most iconic trek. Ancient Inca stone path through cloud forest to Machu Picchu.",tags:['Peru','Inca','Machu Picchu'],color:'#5B8DB8'},
+  {id:'am2',name:'Torres del Paine W Trek',country:'Chile',region:'Americas',lat:-50.94,lng:-73.41,distance:'75 km',altitude:'800 m',duration:'5D/4N',desc:"Patagonia's classic W circuit. Granite towers, glaciers, turquoise lakes and condors.",tags:['Patagonia','Glacier','Condor'],color:'#5B8DB8'},
+  {id:'am3',name:'Appalachian Trail — Great Smoky Section',country:'USA',region:'Americas',lat:35.61,lng:-83.42,distance:'45 km',altitude:'2024 m',duration:'4D/3N',desc:'Appalachian highlights through America\'s most visited national park. Autumn colour spectacle.',tags:['USA','Forest','Autumn'],color:'#5B8DB8'},
+  {id:'am4',name:'John Muir Trail Segment — Yosemite',country:'USA',region:'Americas',lat:37.74,lng:-119.59,distance:'35 km',altitude:'3997 m',duration:'4D/3N',desc:'Sierra Nevada crown jewel. Granite domes, waterfalls, and sub-alpine meadows of Yosemite.',tags:['USA','Sierra Nevada','Waterfall'],color:'#5B8DB8'},
+  {id:'am5',name:'Cocora Valley Trek',country:'Colombia',region:'Americas',lat:4.63,lng:-75.49,distance:'14 km',altitude:'2400 m',duration:'1 Day',desc:'Colombia\'s fairy-tale landscape. Towering wax palms (Colombia\'s national tree) in lush cloud forest.',tags:['Colombia','Palms','Cloud Forest'],color:'#5B8DB8'},
+  {id:'am6',name:'Quilotoa Loop',country:'Ecuador',region:'Americas',lat:-0.86,lng:-78.90,distance:'35 km',altitude:'3914 m',duration:'3D/2N',desc:"Andean crater lake trail. Indigenous markets, volcano-fed crater lake and Ecuadorian highland culture.",tags:['Ecuador','Crater','Andes'],color:'#5B8DB8'},
+
+  // AFRICA / MIDDLE EAST
+  {id:'af1',name:'Rwenzori Mountains — Lower Circuit',country:'Uganda',region:'Africa / Middle East',lat:0.38,lng:29.89,distance:'40 km',altitude:'3000 m',duration:'5D/4N',desc:"Mountains of the Moon. Afro-alpine moorland, giant heather and lobelias in Africa's rainiest range.",tags:['Uganda','Afro-Alpine','Rainforest'],color:'#9B6BB5'},
+  {id:'af2',name:'Toubkal Base Trek',country:'Morocco',region:'Africa / Middle East',lat:31.06,lng:-7.91,distance:'16 km',altitude:'3207 m',duration:'2D/1N',desc:"Gateway trek to North Africa's highest peak. Berber villages, cedar forests and Atlas panoramas.",tags:['Morocco','Atlas','Berber'],color:'#9B6BB5'},
+  {id:'af3',name:'Simien Mountains Trek',country:'Ethiopia',region:'Africa / Middle East',lat:13.24,lng:38.37,distance:'50 km',altitude:'4070 m',duration:'5D/4N',desc:"Africa's Grand Canyon. Gelada baboons, Ethiopian wolves, and dramatic escarpments.",tags:['Ethiopia','Wildlife','Escarpment'],color:'#9B6BB5'},
+  {id:'af4',name:'Wadi Rum Desert Trek',country:'Jordan',region:'Africa / Middle East',lat:29.57,lng:35.42,distance:'20 km',altitude:'700 m',duration:'2D/1N',desc:"Mars on Earth. Red sandstone canyons, ancient petroglyphs and Bedouin camp under stars.",tags:['Jordan','Desert','Sandstone'],color:'#9B6BB5'},
+
+  // SE ASIA / PACIFIC
+  {id:'se1',name:'Annapurna Base Camp Trek',country:'Nepal',region:'SE Asia / Pacific',lat:28.53,lng:83.88,distance:'70 km',altitude:'4130 m',duration:'8D/7N',desc:'Iconic amphitheatre of Himalayan giants. Walk through rhododendron forests to the glacier base.',tags:['Annapurna','Glacier','Himalaya'],color:'#E87040'},
+  {id:'se2',name:'Mount Rinjani Crater Rim',country:'Indonesia',region:'SE Asia / Pacific',lat:-8.41,lng:116.46,distance:'28 km',altitude:'3726 m',duration:'3D/2N',desc:"Indonesia's second-highest volcano. Stunning crater lake, hot springs and Lombok coast views.",tags:['Indonesia','Volcano','Crater'],color:'#E87040'},
+  {id:'se3',name:'Doi Inthanon Circuit',country:'Thailand',region:'SE Asia / Pacific',lat:18.59,lng:98.49,distance:'15 km',altitude:'2565 m',duration:'2D/1N',desc:"Thailand's highest peak trail. Hill tribe villages, twin royal chedis and montane birdwatching.",tags:['Thailand','Summit','Birdwatching'],color:'#E87040'},
+  {id:'se4',name:'Tongariro Alpine Crossing',country:'New Zealand',region:'SE Asia / Pacific',lat:-39.13,lng:175.67,distance:'19.4 km',altitude:'1886 m',duration:'1 Day',desc:"NZ's greatest one-day walk. Volcanic craters, emerald lakes and desolate lava flows.",tags:['New Zealand','Volcanic','Alpine'],color:'#E87040'},
+  {id:'se5',name:'Overland Track Tasmania',country:'Australia',region:'SE Asia / Pacific',lat:-41.69,lng:145.97,distance:'80 km',altitude:'1617 m',duration:'6D/5N',desc:"Australia's greatest multi-day trek. Ancient rainforest, dolerite peaks and wild alpine lakes.",tags:['Australia','Rainforest','Alpine'],color:'#E87040'},
+];
+
+// ─── MAP RENDERING ───────────────────────────────────────────────
+let mapFilter = 'all';
+let mapSearchQuery = '';
+
+// Simple equirectangular projection
+function lngLatToXY(lng, lat, vw=1000, vh=500) {
+  const x = (lng + 180) / 360 * vw;
+  const y = (90 - lat) / 180 * vh;
+  return [x, y];
+}
+
+// Simple SVG world map paths (stylized continents)
+const WORLD_PATH = `
+<rect width="1000" height="500" fill="#d4e8f0" rx="0"/>
+<!-- Continents simplified -->
+<!-- North America -->
+<path d="M80 80 Q120 60 160 80 Q200 70 230 90 Q250 110 245 140 Q240 170 220 190 Q200 210 180 230 Q160 260 140 280 Q120 270 110 250 Q90 220 80 190 Q60 160 65 130 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- South America -->
+<path d="M185 270 Q210 260 235 275 Q255 290 260 320 Q265 360 250 400 Q230 440 200 450 Q175 445 160 420 Q145 390 150 350 Q155 310 170 285 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- Europe -->
+<path d="M440 70 Q480 55 510 70 Q530 80 525 110 Q515 130 495 145 Q470 155 450 145 Q430 135 425 110 Q420 88 440 70 Z" fill="#b8d0a0" opacity="0.85"/>
+<!-- Africa -->
+<path d="M450 160 Q490 150 515 165 Q540 185 545 225 Q555 275 550 320 Q545 375 520 400 Q495 420 465 415 Q435 405 420 370 Q405 330 410 285 Q415 240 425 200 Q435 170 450 160 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- Asia -->
+<path d="M520 50 Q600 35 680 45 Q760 50 820 70 Q870 90 880 130 Q885 170 865 200 Q840 225 800 235 Q750 245 700 240 Q650 240 610 225 Q570 210 545 185 Q520 165 515 130 Q510 90 520 50 Z" fill="#b8d0a0" opacity="0.85"/>
+<!-- India sub -->
+<path d="M600 195 Q625 185 645 200 Q655 220 650 250 Q640 280 620 295 Q600 285 590 260 Q580 235 590 210 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- SE Asia + Indonesia loosely -->
+<path d="M700 220 Q740 210 770 225 Q790 245 780 265 Q760 280 735 275 Q710 265 705 245 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- Australia -->
+<path d="M740 330 Q800 315 845 335 Q875 360 870 400 Q860 435 825 445 Q785 450 755 430 Q725 410 720 375 Q718 345 740 330 Z" fill="#c8d8a8" opacity="0.85"/>
+<!-- Antarctica hint -->
+<path d="M200 480 Q500 470 800 480 Q900 490 1000 500 L0 500 Z" fill="#e8f0f8" opacity="0.6"/>
+`;
+
+function renderWorldMap() {
+  const svg = document.getElementById('worldMapSvg');
+  if (!svg) return;
+
+  const filtered = WORLD_TREKS.filter(t => {
+    const matchRegion = mapFilter === 'all' || matchesFilter(t, mapFilter);
+    const matchSearch = !mapSearchQuery || t.name.toLowerCase().includes(mapSearchQuery) || t.country.toLowerCase().includes(mapSearchQuery);
+    return matchRegion && matchSearch;
+  });
+
+  let pins = '';
+  filtered.forEach(trek => {
+    const [x, y] = lngLatToXY(trek.lng, trek.lat);
+    pins += `<g class="map-pin" onclick="showMapTrekDetail('${trek.id}')" transform="translate(${x},${y})">
+      <circle r="7" fill="${trek.color}" stroke="white" stroke-width="1.5" opacity="0.92"/>
+      <circle r="3" fill="white" opacity="0.7"/>
+    </g>`;
+  });
+
+  svg.innerHTML = WORLD_PATH + pins;
+
+  // Attach hover events after render
+  svg.querySelectorAll('.map-pin').forEach(pin => {
+    pin.addEventListener('mouseenter', e => showMapTooltip(e, pin));
+    pin.addEventListener('mouseleave', hideMapTooltip);
+    pin.addEventListener('touchstart', e => { e.preventDefault(); showMapTrekDetail(pin.getAttribute('onclick').match(/'([^']+)'/)[1]); });
+  });
+
+  // Render list
+  const grid = document.getElementById('trekListGrid');
+  const label = document.getElementById('mapCountLabel');
+  label.textContent = `(${filtered.length} treks)`;
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="emoji">🔍</span><h3>No treks found</h3><p>Try a different search or filter.</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(t => `
+    <div class="trek-list-item" onclick="showMapTrekDetail('${t.id}')">
+      <div class="trek-country">${t.country}</div>
+      <h4>${t.name}</h4>
+      <div class="trek-meta" style="margin-bottom:8px">
+        <span class="trek-meta-item">📏 ${t.distance}</span>
+        <span class="trek-meta-item">⛰️ ${t.altitude}</span>
+        <span class="trek-meta-item">⏱️ ${t.duration}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${t.tags.map(tag=>`<span class="badge badge-moderate">${tag}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function matchesFilter(trek, filter) {
+  if (filter === 'India') return trek.region === 'India';
+  if (filter === 'Nepal') return trek.region === 'Nepal / Bhutan';
+  if (filter === 'Europe') return trek.region === 'Europe';
+  if (filter === 'Americas') return trek.region === 'Americas';
+  return true;
+}
+
+function showMapTooltip(e, pin) {
+  const id = pin.getAttribute('onclick').match(/'([^']+)'/)[1];
+  const trek = WORLD_TREKS.find(t => t.id === id);
+  if (!trek) return;
+  const tooltip = document.getElementById('mapTooltip');
+  tooltip.innerHTML = `<h4>${trek.name}</h4><p>${trek.country} • ${trek.altitude} • ${trek.duration}</p><p style="margin-top:4px;font-size:10px;opacity:0.8">${trek.desc.substring(0,80)}…</p>
+    <div class="tip-badges">${trek.tags.map(t=>`<span class="tip-badge">${t}</span>`).join('')}</div>`;
+  const rect = document.getElementById('worldMapContainer').getBoundingClientRect();
+  const svgEl = document.getElementById('worldMapSvg');
+  const svgRect = svgEl.getBoundingClientRect();
+  const pt = svgEl.createSVGPoint();
+  // get the pin's SVG coords from its transform
+  const transform = pin.getAttribute('transform');
+  const m = transform.match(/translate\(([^,]+),([^)]+)\)/);
+  if (m) {
+    pt.x = parseFloat(m[1]); pt.y = parseFloat(m[2]);
+  }
+  const ctm = svgEl.getScreenCTM();
+  const screenPt = pt.matrixTransform(ctm);
+  const relX = screenPt.x - rect.left;
+  const relY = screenPt.y - rect.top;
+  tooltip.style.left = relX + 'px';
+  tooltip.style.top = (relY - 8) + 'px';
+  tooltip.classList.add('visible');
+}
+function hideMapTooltip() {
+  document.getElementById('mapTooltip').classList.remove('visible');
+}
+
+function showMapTrekDetail(id) {
+  const trek = WORLD_TREKS.find(t => t.id === id);
+  if (!trek) return;
+  const el = document.getElementById('mapDetailContent');
+  el.innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="page-eyebrow">${trek.country} • Moderate</div>
+        <h2 class="modal-title">${trek.name}</h2>
+      </div>
+      <button class="modal-close" onclick="closeModal('mapDetailModal')">×</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      <span class="badge badge-moderate">Moderate</span>
+      <span class="badge badge-upcoming">📏 ${trek.distance}</span>
+      <span class="badge badge-wishlist">⛰️ ${trek.altitude}</span>
+      <span class="badge badge-wishlist">⏱️ ${trek.duration}</span>
+    </div>
+    <p style="font-size:13px;color:var(--stone);line-height:1.7;margin-bottom:14px">${trek.desc}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px">
+      ${trek.tags.map(t=>`<span class="badge badge-wishlist">${t}</span>`).join('')}
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-trail" onclick="addMapTrekToWishlist('${trek.id}')">⭐ Add to Wishlist</button>
+      <button class="btn btn-ghost" onclick="closeModal('mapDetailModal')">Close</button>
+    </div>`;
+  openModal('mapDetailModal');
+}
+
+async function addMapTrekToWishlist(id) {
+  const trek = WORLD_TREKS.find(t => t.id === id);
+  if (!trek) return;
+  const list = await dbGet('wishlist');
+  if (list.find(w => w.title === trek.name)) { toast('Already in your wishlist!'); closeModal('mapDetailModal'); return; }
+  list.push({id:uid(), title:trek.name, location:trek.country, difficulty:'Moderate', distance:trek.distance, description:trek.desc, priority:list.length+1, tags:trek.tags});
+  await dbSet('wishlist', list);
+  toast(`⭐ ${trek.name} added to wishlist!`);
+  closeModal('mapDetailModal');
+}
+
+function setMapFilter(filter, btn) {
+  mapFilter = filter;
+  document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWorldMap();
+}
+function filterMapTreks(query) {
+  mapSearchQuery = query.toLowerCase();
+  renderWorldMap();
+}
+
+// ─── EXPOSE GLOBALS ──────────────────────────────────────────────
 Object.assign(window, {
   navigate, openModal, closeModal,
   openScheduleModal, saveTrek, deleteTrek, markComplete, showTrekDetail,
   addItineraryDay, removeDay,
   openWishModal, saveWish, deleteWish, convertToTrek,
   openPhotoUpload, savePhotos, deletePhoto, handlePhotoFiles,
-  openLightbox, closeLightbox,
-  displayMemories,
+  openLightbox, closeLightbox, displayMemories,
+  showMapTrekDetail, addMapTrekToWishlist, setMapFilter, filterMapTreks,
 });
 
-// ─── INIT ────────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   drawElevation();
-
   await seedDemoData();
 
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => navigate(link.dataset.page));
+  });
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => navigate(btn.dataset.page));
   });
   document.querySelectorAll('.modal-backdrop').forEach(bd => {
     bd.addEventListener('click', e => { if (e.target===bd) bd.classList.remove('open'); });
@@ -1046,8 +1282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('memoryFilter')?.addEventListener('change', e => displayMemories(e.target.value));
 
   navigate('page-home');
-
-  // Start Firebase real-time listeners (replaces setInterval polling)
   startRealtimeListeners();
 });
 </script>
